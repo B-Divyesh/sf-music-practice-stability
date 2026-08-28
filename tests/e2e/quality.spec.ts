@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 
-for (const path of ['/', '/demo', '/privacy', '/terms']) {
+for (const path of ['/', '/practice', '/demo', '/privacy', '/terms']) {
   test(`page quality ${path}`, async ({ page }) => {
     const errors: string[] = [];
     page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
@@ -54,6 +54,75 @@ test('home stays within a 390px viewport at 200% text size', async ({ page }) =>
   await page.goto('/');
   await page.evaluate(() => { document.documentElement.style.fontSize = '32px'; });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+});
+
+test('structurally malformed imports preserve the last good data and keep practice usable after reload', async ({ page }) => {
+  await page.goto('/practice');
+  await page.getByLabel('Passage name').fill('Safe backup scale');
+  await page.getByRole('button', { name: 'Set this passage' }).click();
+  await expect(page.getByRole('heading', { name: 'Safe backup scale', level: 2 })).toBeVisible();
+  await page.locator('#import-file').setInputFiles({ name: 'bad-backup.json', mimeType: 'application/json', buffer: Buffer.from('{"passages":[null],"sessions":[]}') });
+  await expect(page.getByRole('alert')).toHaveText('This backup could not be read. Choose a Steady Take JSON backup.');
+  await expect(page.getByRole('heading', { name: 'Safe backup scale', level: 2 })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Safe backup scale', level: 2 })).toBeVisible();
+});
+
+test('a legacy malformed stored record is cleared so the practice page can recover', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.goto('/practice');
+  await page.evaluate(async () => {
+    await new Promise<void>((resolve, reject) => {
+      const open = indexedDB.open('steady-take', 1);
+      open.onsuccess = () => {
+        const request = open.result.transaction('records', 'readwrite').objectStore('records').put({ passages: [null], sessions: [] }, 'app-data');
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      };
+      open.onerror = () => reject(open.error);
+    });
+  });
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Set your first passage' })).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test('cached valid full access stays active when a daily license check is offline', async ({ page, context }) => {
+  await page.goto('/practice');
+  await page.waitForFunction(async () => {
+    await navigator.serviceWorker.ready;
+    return Boolean(navigator.serviceWorker.controller);
+  });
+  // Give the active worker one controlled navigation before disconnecting.
+  await page.reload();
+  await page.evaluate(() => {
+    localStorage.setItem('sb_license:music-practice-stability', 'offline-paid');
+    localStorage.setItem('sb_license_verdict:music-practice-stability', JSON.stringify({ valid: true, checkedAt: Date.now() - 172_800_000 }));
+  });
+  await context.setOffline(true);
+  await page.reload();
+  await expect(page.getByRole('alert')).toHaveText('Could not check the license. Saved full-version access stays active until you reconnect.');
+  await page.getByLabel('Passage name').fill('Offline license scale');
+  await page.getByRole('button', { name: 'Set this passage' }).click();
+  await expect(page.getByRole('button', { name: 'Add passage', exact: true })).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem('sb_license_verdict:music-practice-stability'))).not.toBeNull();
+});
+
+test('static 404 has the standard skeleton, 44px controls, and no 200% text overflow', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/404.html');
+  await expect(page.locator('header, main, footer')).toHaveCount(3);
+  await expect(page.getByRole('heading', { name: 'This page missed the count', level: 1 })).toBeVisible();
+  await page.evaluate(() => { document.documentElement.style.fontSize = '32px'; });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  const undersized = await page.locator('a').evaluateAll((elements) => elements.map((element) => {
+    const rect = element.getBoundingClientRect();
+    return { text: (element as HTMLElement).innerText, width: rect.width, height: rect.height };
+  }).filter((item) => (item.width > 0 || item.height > 0) && (item.width < 44 || item.height < 44)));
+  expect(undersized).toEqual([]);
+  const accessibility = await new AxeBuilder({ page }).analyze();
+  expect(accessibility.violations.filter((violation) => ['serious', 'critical'].includes(violation.impact ?? ''))).toEqual([]);
 });
 
 test('static host config preserves real 404s and immutable hashed assets', ({}, testInfo) => {

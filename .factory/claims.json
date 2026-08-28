@@ -57,10 +57,10 @@
   },
   {
     "id": "paid-passages",
-    "claim": "A valid full-version license adds unlimited saved passages",
+    "claim": "A valid full-version license saves more than one passage",
     "where": "paid section and README",
     "test": "npm test -- --grep @claim:paid-passages",
-    "sandbox": "fresh browser context with a fixture verify response; activate a license and save two passages"
+    "sandbox": "fresh browser context with a fixture verify response; activate a license and save three passages"
   },
   {
     "id": "controlled-takes",
@@ -82,5 +82,26 @@
     "where": "landing limits, privacy page, and README",
     "test": "npm test -- --grep @claim:audio-not-recorded",
     "sandbox": "fresh /demo session with fake microphone; begin and cancel microphone capture, assert no MediaRecorder is created and no audio file or network request is made"
+  },
+  {
+    "id": "take-correction",
+    "claim": "You can correct any take before saving",
+    "where": "landing limits",
+    "test": "npm test -- --grep @claim:take-correction",
+    "sandbox": "fresh /demo session; capture a take, remove it, recapture it, and save the six-take session"
+  },
+  {
+    "id": "license-on-demand",
+    "claim": "License verification contacts Sociobot only after you enter or buy a license",
+    "where": "privacy page",
+    "test": "npm test -- --grep @claim:license-on-demand",
+    "sandbox": "fresh browser context; assert no external request before license submission, then fixture-submit a token and observe the Sociobot verify request"
+  },
+  {
+    "id": "revoked-license",
+    "claim": "A refunded or revoked license stops full-version access",
+    "where": "terms page",
+    "test": "npm test -- --grep @claim:revoked-license",
+    "sandbox": "fresh browser context; activate a valid fixture license, expire its cached verdict, return a revoked fixture, and assert full access is removed"
   }
 ]

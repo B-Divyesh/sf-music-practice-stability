@@ -110,7 +110,7 @@ test('@claim:free-passage-limit free mode keeps one passage', async ({ page }) =
   await expect(page.getByText('The free version saves one passage. Buy the full version to add another.')).toBeVisible();
 });
 
-test('@claim:paid-passages valid license permits a second saved passage', async ({ page }) => {
+test('@claim:paid-passages valid license saves more than one passage', async ({ page }) => {
   await page.route('https://api.sociobot.in/api/v1/products/music-practice-stability/verify?license=valid-test', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ valid: true, reason: 'ok' }) }));
   await page.goto('/');
   await page.getByRole('button', { name: 'Have a license?' }).click();
@@ -120,10 +120,17 @@ test('@claim:paid-passages valid license permits a second saved passage', async 
   await page.getByRole('link', { name: 'Practice' }).click();
   await page.getByLabel('Passage name').fill('D minor turn');
   await page.getByRole('button', { name: 'Set this passage' }).click();
+  await expect(page.getByRole('heading', { name: 'D minor turn', level: 2 })).toBeVisible();
   await page.getByRole('button', { name: 'Add passage', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Set another passage', level: 2 })).toBeVisible();
   await page.getByLabel('Passage name').fill('A major shift');
   await page.getByRole('button', { name: 'Set this passage' }).click();
-  await expect(page.locator('.passage-picker>div button')).toHaveCount(2);
+  await expect(page.getByRole('heading', { name: 'A major shift', level: 2 })).toBeVisible();
+  await page.getByRole('button', { name: 'Add passage', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Set another passage', level: 2 })).toBeVisible();
+  await page.getByLabel('Passage name').fill('E minor return');
+  await page.getByRole('button', { name: 'Set this passage' }).click();
+  await expect(page.locator('.passage-picker>div button')).toHaveCount(3);
 });
 
 test('@claim:controlled-takes controlled marks persist with the saved session', async ({ page }) => {
@@ -167,4 +174,52 @@ test('@claim:audio-not-recorded microphone capture creates no recording or audio
   await page.getByRole('button', { name: 'Cancel take' }).click();
   expect(await page.evaluate(() => (window as unknown as { __steadyRecorderCalls: number }).__steadyRecorderCalls)).toBe(0);
   expect(external).toEqual([]);
+});
+
+test('@claim:take-correction a captured take can be removed and replaced before saving', async ({ page }) => {
+  await page.goto('/demo');
+  const captureTake = async () => {
+    await page.getByRole('button', { name: /Start take/ }).click();
+    for (let attack = 0; attack < 4; attack += 1) await page.keyboard.press('Space');
+  };
+  await captureTake();
+  await page.getByRole('button', { name: 'Remove take 1' }).click();
+  await expect(page.getByText('Take removed. Record it again when ready.')).toBeVisible();
+  for (let take = 0; take < 6; take += 1) await captureTake();
+  await page.getByRole('button', { name: 'Save this session' }).click();
+  await expect(page.getByText(/Session saved with \d+ ms timing spread\./)).toBeVisible();
+});
+
+test('@claim:license-on-demand verify traffic starts only after a user enters a token', async ({ page }) => {
+  const external: string[] = [];
+  page.on('request', (request) => {
+    if (new URL(request.url()).origin !== 'http://127.0.0.1:4173') external.push(request.url());
+  });
+  await page.route('https://api.sociobot.in/api/v1/products/music-practice-stability/verify?license=on-demand', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ valid: true, reason: 'ok' }) }));
+  await page.goto('/privacy');
+  expect(external).toEqual([]);
+  await page.getByRole('link', { name: 'Steady Take home' }).click();
+  await page.getByRole('button', { name: 'Have a license?' }).click();
+  await page.getByLabel('License token').fill('on-demand');
+  await page.getByRole('button', { name: 'Verify license' }).click();
+  await expect(page.getByText('Full version active on this device.')).toBeVisible();
+  expect(external).toEqual(['https://api.sociobot.in/api/v1/products/music-practice-stability/verify?license=on-demand']);
+});
+
+test('@claim:revoked-license a cached full license is locked after a revoked verdict', async ({ page }) => {
+  let revoked = false;
+  await page.route('https://api.sociobot.in/api/v1/products/music-practice-stability/verify?license=revocable', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(revoked ? { valid: false, reason: 'revoked' } : { valid: true, reason: 'ok' }) }));
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Have a license?' }).click();
+  await page.getByLabel('License token').fill('revocable');
+  await page.getByRole('button', { name: 'Verify license' }).click();
+  await page.getByRole('link', { name: 'Practice' }).click();
+  await page.getByLabel('Passage name').fill('Revocation scale');
+  await page.getByRole('button', { name: 'Set this passage' }).click();
+  revoked = true;
+  await page.evaluate(() => localStorage.setItem('sb_license_verdict:music-practice-stability', JSON.stringify({ valid: true, checkedAt: Date.now() - 172_800_000 })));
+  await page.reload();
+  await expect(page.getByRole('alert')).toHaveText('This license is no longer active. Buy the full version to restore full access.');
+  await expect(page.getByRole('button', { name: 'Add passage with full version' })).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem('sb_license:music-practice-stability'))).toBeNull();
 });

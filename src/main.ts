@@ -1,5 +1,5 @@
 import './styles.css';
-import { loadData, resetDemo, saveData } from './data';
+import { loadData, parseAppData, resetDemo, saveData } from './data';
 import { improvement, sessionSpread, takeDeviation } from './stability';
 import type { AppData, CaptureState, InputMode, Passage, Session, Take } from './types';
 
@@ -9,7 +9,7 @@ const LICENSE_KEY = `sb_license:${SLUG}`;
 const VERIFY_KEY = `sb_license_verdict:${SLUG}`;
 const API_BASE = 'https://api.sociobot.in/api/v1';
 const CHECKOUT = `${API_BASE}/products/${SLUG}/checkout`;
-const BUILD_ID = 'v1.0.1';
+const BUILD_ID = 'v1.0.2';
 
 let data: AppData = { passages: [], sessions: [] };
 let demo = false;
@@ -113,7 +113,7 @@ function landing(): string {
     </section>
     <section class="paid-section" aria-labelledby="paid-title">
       <div class="price-stamp"><span>One time</span><strong>$12</strong></div>
-      <div><p class="eyebrow"><span>05</span> Full version</p><h2 id="paid-title">Keep every passage</h2><p>Practice one passage free. The full version adds unlimited saved passages.</p>
+      <div><p class="eyebrow"><span>05</span> Full version</p><h2 id="paid-title">Keep every passage</h2><p>Practice one passage free. The full version saves more than one passage.</p>
       <div class="paid-actions"><a class="button secondary" href="${CHECKOUT}">Buy the full version</a><button class="text-button" data-action="show-license">Have a license?</button></div>
       <form id="license-form" class="license-form hidden"><label for="license-token">License token</label><div><input id="license-token" name="license" autocomplete="off" required><button class="button small" type="submit">Verify license</button></div><p>Sociobot is the merchant of record. Purchase terms apply.</p></form></div>
     </section>
@@ -386,18 +386,38 @@ function csv(): string {
 async function verifyLicense(token: string): Promise<void> {
   if (demo) return;
   notice = 'Checking the license…'; errorMessage = ''; await render();
+  const cached = cachedValidVerdict();
   try {
     const response = await fetch(`${API_BASE}/products/${SLUG}/verify?license=${encodeURIComponent(token)}`);
-    const result = await response.json() as { valid: boolean };
-    if (!result.valid) throw new Error('invalid');
+    const result = await response.json() as { valid?: boolean; reason?: string };
+    if (!response.ok || result.valid !== true) {
+      localStorage.removeItem(LICENSE_KEY);
+      localStorage.removeItem(VERIFY_KEY);
+      isPaid = false;
+      errorMessage = result.reason === 'revoked' ? 'This license is no longer active. Buy the full version to restore full access.' : 'This license is not active. Check the token or buy the full version.';
+      notice = '';
+      await render();
+      return;
+    }
     localStorage.setItem(LICENSE_KEY, token);
     localStorage.setItem(VERIFY_KEY, JSON.stringify({ valid: true, checkedAt: Date.now() }));
     isPaid = true; notice = 'Full version active on this device.';
   } catch {
-    localStorage.removeItem(VERIFY_KEY); isPaid = false;
-    errorMessage = 'The license could not be verified. Check the token and your connection.'; notice = '';
+    // A transport failure says nothing about a previously valid one-time license.
+    isPaid = Boolean(cached);
+    errorMessage = cached ? 'Could not check the license. Saved full-version access stays active until you reconnect.' : 'The license could not be verified. Check the token and your connection.';
+    notice = '';
   }
   await render();
+}
+
+function cachedValidVerdict(): { valid: true; checkedAt: number } | null {
+  try {
+    const verdict = JSON.parse(localStorage.getItem(VERIFY_KEY) ?? 'null') as { valid?: unknown; checkedAt?: unknown } | null;
+    return verdict?.valid === true && typeof verdict.checkedAt === 'number' && Number.isFinite(verdict.checkedAt) ? { valid: true, checkedAt: verdict.checkedAt } : null;
+  } catch {
+    return null;
+  }
 }
 
 async function initialiseLicense(): Promise<void> {
@@ -409,8 +429,8 @@ async function initialiseLicense(): Promise<void> {
     history.replaceState({}, '', `${url.pathname}${url.search}`);
   }
   const token = localStorage.getItem(LICENSE_KEY);
-  const cached = JSON.parse(localStorage.getItem(VERIFY_KEY) ?? 'null') as { valid: boolean; checkedAt: number } | null;
-  isPaid = Boolean(token && cached?.valid);
+  const cached = cachedValidVerdict();
+  isPaid = Boolean(token && cached);
   if (token && (!cached || Date.now() - cached.checkedAt > 86_400_000) && location.pathname !== '/demo') void verifyLicense(token);
 }
 
@@ -476,8 +496,8 @@ app.addEventListener('change', async (event) => {
   const input = event.target as HTMLInputElement;
   if (input.id !== 'import-file' || !input.files?.[0]) return;
   try {
-    const imported = JSON.parse(await input.files[0].text()) as AppData;
-    if (!Array.isArray(imported.passages) || !Array.isArray(imported.sessions)) throw new Error('shape');
+    const imported = parseAppData(JSON.parse(await input.files[0].text()));
+    if (!imported) throw new Error('shape');
     data = imported; capture = null; await saveData(data, false); notice = 'Backup imported.'; errorMessage = '';
   } catch { errorMessage = 'This backup could not be read. Choose a Steady Take JSON backup.'; }
   await render();

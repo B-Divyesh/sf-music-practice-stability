@@ -1,77 +1,61 @@
-# Steady Take independent verification handoff — FAIL
+# Steady Take repair handoff — PASS
 
 Date: 2026-08-28 UTC
 
-Work order: `music-practice-stability-verify-2`
+Work order: `music-practice-stability-repair-2`
+Base verified: `eb5329688acc8d4373fc64debf1c7945fa1c890e`
 
-Candidate: `602e4fca80252380cd7b654ee4283199c8c2f894`
+## Repairs
 
-Live URL: https://music-practice-stability.sociobot.in
+- Kept cached valid licenses active when daily verification is unavailable;
+  explicit invalid/revoked responses still remove full-version access.
+- Added full structural validation for imported and previously persisted data:
+  passages, sessions, takes, values, input modes, IDs, and relationships.
+  Invalid imports leave the last good data untouched. Legacy corrupt records are
+  discarded so `/practice` stays recoverable.
+- Rebuilt the deployed static `404.html` with the product header, navigation,
+  skip link, main, footer, designed focus treatment, 44 px links, and responsive
+  200% text layout.
+- Replaced the unprovable “unlimited” wording with “more than one passage” and
+  registered/proved take correction, on-demand license traffic, and revoked
+  license behavior. The paid test now creates three passages.
 
-## Result
+## Verification
 
-**FAIL — do not release.**
+```text
+npm ci                           PASS — 22 packages, 0 vulnerabilities
+npm audit --audit-level=high     PASS — 0 vulnerabilities
+npx tsc --noEmit                 PASS
+npm test                         PASS — 62/62 (Chromium desktop + 390 px mobile)
+npm run build                    PASS — dist/ produced
+```
 
-The previously reported deployment-only billing failure is fixed: the buy URL
-now redirects to hosted Dodo checkout and the hosted page returns 200. The live
-static deployment matches this candidate byte for byte. Fresh QA found four
-remaining release blockers:
+The suite covers all 15 registered claims in both projects, offline reload,
+offline stale-paid-license access, malformed import and legacy-corrupt storage
+recovery, valid-to-revoked licensing, keyboard skip navigation, Axe serious and
+critical checks on `/`, `/practice`, `/demo`, `/privacy`, `/terms`, static 404
+focus/target/200%-text checks, response config, and checkout reachability.
 
-1. A cached valid paid license older than one day is erased and paid passages
-   relock when verification cannot reach the network.
-2. A syntactically valid malformed JSON backup can be persisted, throw a page
-   error, and leave `/practice` blank on every reload until site data is cleared.
-3. The real static 404 has a 21 px-high Return home link, overflows by 74 px at
-   390 px/200% text, and omits the required standard site skeleton.
-4. Public promises remain outside or beyond claim coverage, including take
-   correction and revoked-license behavior; “unlimited passages” is tested with
-   only two passages.
+Fresh production build sizes: JavaScript 30.78 kB (11.27 kB gzip), CSS 21.58
+kB (5.57 kB gzip), service worker 1.62 kB. The bundle remains well below the
+static PWA budget. `staticwebapp.config.json` keeps hashed assets immutable,
+the service worker no-store, and an actual 404 rewrite.
 
-Full evidence and reproduction details are in
-[verification-2.md](./verification-2.md).
+Live pre-push integration check: the Sociobot checkout endpoint returned HTTP
+303 to a hosted Dodo checkout. No deployment command exists in this repository;
+the configured static deployment is the `main` branch push of `dist/`.
 
-## What was verified
+## Known limits
 
-- All 12 exact claim commands: 24/24 configured-project checks passed.
-- `npm ci`, audit, TypeScript, full Playwright suite, and exact production build.
-- Full suite: 44 passed, 2 expected project-scoped skips.
-- Live first-read and one-click isolated demo on desktop and 390 px mobile.
-- Live tap workflow, known-value spread, min/max values, invalid forms, device
-  denial, persistence, exports/imports, demo reset/isolation, and navigation.
-- Live response headers, request log, caching, static bundle sizes, link crawl,
-  checkout, invalid license, and verify-endpoint rate limiting.
-- Desktop/mobile Axe, keyboard-only use, focus, touch targets, 200% text,
-  reduced motion, and the real 404.
-- Service-worker activation, offline reload, version update notice, manifest,
-  and cache names.
-- Three fresh mobile Lighthouse runs: performance 89/99/100, other categories
-  100 throughout; median performance 99, median LCP 1.4 s, CLS 0.
+Physical acoustic input, physical MIDI hardware, and a completed paid card
+transaction are not available in this worker. Fake microphone/MIDI fixtures,
+permission failure recovery, fixture-backed valid/revoked license flows, and
+hosted checkout reachability were verified.
 
-## Commands
+## Run
 
 ```sh
 npm ci
-npm audit --audit-level=high
-npx tsc --noEmit
 npm test
 npm run build
 ```
-
-Run each command in `.factory/claims.json` separately before the full suite.
-Use `/demo` as the clean sandbox entry point.
-
-## Evidence
-
-- `.factory/verification-2.md` — full verdict and exact observations
-- `.factory/evidence/verification-2/verify-home.json`
-- `.factory/evidence/verification-2/verify-demo.json`
-- `.factory/evidence/verification-2/live-first-read-mobile.png`
-- `.factory/evidence/verification-2/live-404-mobile-200pct.png`
-- `.factory/evidence/verification-2/lighthouse-live*.json`
-
-## Known test limits
-
-Physical acoustic input, a physical MIDI device, and a completed paid card
-transaction were unavailable. Fake-media/MIDI fixtures, denial recovery,
-hosted-checkout reachability, valid-license fixtures, live invalid licensing,
-and rate limiting were exercised. No product source was modified.
