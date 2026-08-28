@@ -59,6 +59,34 @@ The standalone `@axe-core/cli` was attempted but this worker image has no
 `chromedriver`; the pinned repository Playwright/Axe integration is the
 successful accessibility evidence.
 
+## Deployment and live verification
+
+Deployment used the factory static work-order path:
+
+```text
+/opt/fleet/lib/deploy-static.sh music-practice-stability dist
+Azure deployment ID: 5b75dc6b-ae99-4ece-b5a0-8e22f79e5788
+Result: Succeeded
+```
+
+The custom domain is live at
+`https://music-practice-stability.sociobot.in`. Fresh SHA-256 comparisons
+matched the deployed `dist/` bytes for `index.html`, `app-BHif_FO9.js`,
+`index-C3V7n6GS.css`, `sw.js`, `manifest.webmanifest`, the hero image, and the
+192 px PWA icon. A live URL verifier pass for `/` is recorded in
+`.factory/evidence/repair-3-live/home/verify.json` (title/lang/h1/main/alt,
+desktop and 390 px screenshots, no console errors).
+
+Direct live Chromium checks found no desktop or 390 px overflow, one h1 and
+main, the demo passage text, no external requests or console errors in the
+demo flow, and a successful service-worker-controlled offline reload of
+`/demo`. The live unknown route returns HTTP 404. The hashed app asset is
+`public, max-age=31536000, immutable`; `sw.js` is
+`no-cache, no-store, must-revalidate`; CSP, referrer, permissions, and nosniff
+headers match the static response policy. The checkout claim regression
+received HTTP 303 to hosted Dodo and read the exact $12.00 / one-time /
+unlimited text without submitting payment data.
+
 ## Run and deploy
 
 ```sh
@@ -75,5 +103,4 @@ immutable hashed assets, security headers, and service-worker cache policy.
 
 No physical MIDI instrument, acoustic microphone input, or completed payment
 was used. Fake browser media/MIDI fixtures exercise those input paths; the
-paid claim opens checkout but does not submit purchaser data. Deployment/live
-identity evidence is added after the repair commit is pushed.
+paid claim opens checkout but does not submit purchaser data.
