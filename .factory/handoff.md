@@ -42,6 +42,8 @@ when the external refund policy could not be honestly proven.
   `/privacy`, `/terms`, and static `/404.html`; keyboard skip-link, route focus,
   touch targets, reduced motion, 200% text, metadata, and mobile overflow are
   covered by `tests/e2e/quality.spec.ts`.
+- Live mobile Lighthouse: performance 95, accessibility 100, best practices
+  100, SEO 100; LCP 1.5 s, CLS 0, and total blocking time 260 ms.
 - PWA/offline/privacy: claim tests cover offline demo reload, same-origin demo
   traffic, audio-not-recorded, demo isolation, license-on-demand, and the
   same-origin service-worker update check.
