@@ -1,80 +1,74 @@
-# Steady Take build handoff
+# Steady Take verification handoff — FAIL
 
-Date: 2026-08-28
+Date: 2026-08-28 UTC
 
-Work order: `music-practice-stability-build-1`
+Work order: `music-practice-stability-verify-1`
 
-Build: `v1.0.0`
+Candidate: `f7b0742fe18a2781b07e36907ce83693f9586bff`
 
-## What shipped
+Live URL: `https://music-practice-stability.sociobot.in`
 
-- A Vite and TypeScript offline PWA with a 28.3 KB production JavaScript file
-  (10.5 KB gzip) and a 20.5 KB CSS file (5.4 KB gzip).
-- A complete six-take practice loop for two to eight attacks. Learners can use
-  the large tap key, Space, microphone onset detection, or Web MIDI notes.
-- Per-take deviation, controlled marks, session timing spread, and passage
-  trends with visual and text chart forms.
-- IndexedDB storage, JSON backup import/export, CSV export, clear-data
-  confirmation, and a localStorage fallback when IndexedDB is unavailable.
-- A separate `/demo` sandbox seeded with six sessions. It uses only the
-  `demo:steady-take` sessionStorage key and includes reset and exit controls.
-- Offline app-shell caching, manifest, install icons, offline fallback, update
-  notice, and cached real routes.
-- A free one-passage tier and a $12 one-time full version. Checkout, returned
-  license storage, daily verification, offline cached verdicts, and pasted
-  license recovery follow the Sociobot billing contract.
-- `/privacy`, `/terms`, SPA route focus handling, styled 404 pages, sitemap,
-  robots file, metadata, CSP, and static deployment configuration.
-- A product-specific measured-geometry system and original generated hero art.
-  The prompt, source, review notes, and shipping derivatives are recorded in
-  `.factory/design.md` and `assets/src/`.
+## Release decision
 
-## Verification
+**FAIL — do not release.**
 
-Commands run from `/work/repo`:
+The live static artifact matches a fresh production build of the candidate and
+the core offline practice loop works. Release is blocked because the advertised
+$12 purchase link returns HTTP 404. Accessibility requirements also fail for
+sub-44 px targets and a 1.92:1 focus ring on paper. Additional blockers and
+evidence are in [verification.md](verification.md).
+
+## Verification summary
+
+- First-read gate: PASS. The first screen states the task, names beginning
+  instrumentalists, and offers “Try it with sample data” in one click.
+- Claims: all 9 commands pass on desktop and mobile after `npm ci` (18 checks),
+  but additional landing/README promises are not registered as claims.
+- Full tests: PASS, 30/30.
+- Type check and exact production build: PASS.
+- Dependency audit: PASS, 0 vulnerabilities.
+- Deployment identity: PASS, 10 primary files match byte-for-byte.
+- Core live flow: PASS for sample, tap capture, controlled marks, persistence,
+  input fallbacks, export/import tests, and demo isolation.
+- Offline reload/update: PASS.
+- Axe: 0 violations on home, demo, practice, privacy, and terms.
+- Manual accessibility: FAIL for target size and focus contrast.
+- Paid checkout: FAIL, HTTP 404.
+- Rate limiting: PASS; observed threshold 30 accepted verify requests, then 429
+  with `Retry-After: 4`.
+- Fresh mobile Lighthouse: 91 performance / 100 accessibility / 100 best
+  practices / 100 SEO; LCP 1.5 s, CLS 0, 127 KiB transfer.
+
+## Defects by severity
+
+- Critical: production checkout endpoint returns 404.
+- High: many interactive targets are 19–32 px high/large instead of 44 px.
+- High: focus ring contrast is 1.92:1 against the paper background.
+- High: public promises are absent from `.factory/claims.json`.
+- Medium: whitespace-only passage names create a blank passage.
+- Medium: unknown routes return a soft HTTP 200.
+- Medium: `paramfactory.com` footer link does not resolve.
+- Medium: fixed-name assets have only `max-age=30`, not immutable caching.
+- Low: the home page overflows by 3 px at 200% text size on a 390 px viewport.
+
+## Commands to reproduce
 
 ```sh
+npm ci
 npm audit --audit-level=high
 npm test
+npx tsc --noEmit
 npm run build
-VERIFY_NODE_MODULES=/work/repo/node_modules /opt/fleet/lib/verify-url.sh http://127.0.0.1:4173/ .factory/evidence/home
-VERIFY_NODE_MODULES=/work/repo/node_modules /opt/fleet/lib/verify-url.sh http://127.0.0.1:4173/demo .factory/evidence/demo
+curl -i https://api.sociobot.in/api/v1/products/music-practice-stability/checkout
 ```
 
-Results:
+For the full test method, exact claim results, live route matrix, response
+headers, PWA evidence, API burst threshold, artifact hashes, and remediation
+list, see `.factory/verification.md`.
 
-- Dependency audit: 0 vulnerabilities.
-- Playwright: 30/30 passed across desktop Chromium and a 390 px mobile profile.
-- Every entry in `.factory/claims.json` passed from a fresh browser context.
-- Offline demo reload passed with its sample history intact.
-- Axe: 0 serious or critical violations on home, demo, privacy, and terms.
-- URL verifier: one h1, one main, English language, complete image alt text,
-  labeled buttons, and no console errors on home or demo.
-- `npm run build`: passed; `dist/index.html` is at the deployment root.
-- Lighthouse mobile: performance 99, accessibility 100, best practices 100,
-  SEO 100. LCP 1.7 s, FCP 1.0 s, TBT 80 ms, CLS 0, Speed Index 1.0 s.
-- Shipping hero derivatives: 22 KB at 768 px and 45 KB at 1200 px.
-- Self-hosted font: 67 KB. No runtime CDN, analytics, or tracking request.
+## What remains
 
-Compact evidence is in `.factory/evidence/`. The copy audit has no sentence
-over 22 words and no banned term.
-
-## Known gaps
-
-- Microphone sensitivity uses a conservative transient threshold. Very soft
-  instruments or noisy rooms may need the tap key.
-- Real MIDI and acoustic instruments were not available in the container.
-  Automated tests use browser microphone and MIDI fixtures; tap capture is
-  exercised end to end.
-- Web MIDI is unavailable in Safari. The tap and microphone paths remain
-  available there.
-- The factory must register the paid product before the live checkout link can
-  complete a purchase.
-
-## Next steps
-
-1. Register `music-practice-stability` with the Sociobot billing engine at the
-   documented $12 one-time price.
-2. Deploy `dist/` through the factory static pipeline.
-3. Smoke-test microphone thresholds on piano, guitar, and a sustained wind
-   instrument before tuning the fixed defaults.
+Fix the critical/high findings first, then the routing, link, input, and caching
+defects. Re-run the entire verification contract against a fresh commit and the
+production URL. Physical acoustic and MIDI devices were not available in this
+container; retain fixture coverage and add hardware smoke checks before release.
