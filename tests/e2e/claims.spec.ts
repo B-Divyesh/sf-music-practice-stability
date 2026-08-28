@@ -13,15 +13,27 @@ test('@claim:sample-improvement sample has six sessions and a 52% drop', async (
   await expect(page.locator('.trend-figure details li')).toHaveCount(6);
 });
 
-test('@claim:offline-reload demo reloads with its data offline', async ({ page, context }) => {
+test('@claim:offline-reload demo prepares offline use, then reloads with its data offline', async ({ page, context }) => {
+  await page.addInitScript(() => {
+    const register = navigator.serviceWorker.register.bind(navigator.serviceWorker);
+    Object.defineProperty(navigator.serviceWorker, 'register', {
+      configurable: true,
+      value: (...args: Parameters<ServiceWorkerContainer['register']>) => new Promise((resolve, reject) => {
+        setTimeout(() => { void register(...args).then(resolve, reject); }, 300);
+      }),
+    });
+  });
   await page.goto('/demo');
+  await expect(page.locator('#connection-status')).toHaveText('Preparing offline use');
   await page.waitForFunction(async () => {
     await navigator.serviceWorker.ready;
     return Boolean(navigator.serviceWorker.controller);
   });
+  await expect(page.locator('#connection-status')).toHaveText('Ready offline');
   await page.reload();
   await context.setOffline(true);
   await page.reload();
+  await expect(page.locator('#connection-status')).toHaveText('Offline now');
   await expect(page.getByRole('heading', { name: 'G major crossing', level: 2 })).toBeVisible();
   await expect(page.getByText('26 milliseconds timing spread, 52% lower than the first session.')).toBeVisible();
 });
@@ -86,6 +98,47 @@ test('@claim:input-options microphone and MIDI inputs enter capture', async ({ p
     await page.waitForTimeout(30);
   }
   await expect(page.getByText('Take 1 captured. Mark it controlled if it felt settled.')).toBeVisible();
+});
+
+test('@claim:permission-on-demand microphone and MIDI APIs are requested only after Start take', async ({ page }) => {
+  await page.addInitScript(() => {
+    const calls = { microphone: 0, midi: 0 };
+    const stream = { getTracks: () => [{ stop: () => undefined }] };
+    const input: { onmidimessage: ((event: { data: Uint8Array }) => void) | null } = { onmidimessage: null };
+    Object.defineProperty(window, '__steadyPermissionCalls', { configurable: true, value: calls });
+    Object.defineProperty(navigator, 'mediaDevices', {
+      configurable: true,
+      value: { getUserMedia: async () => { calls.microphone += 1; return stream; } },
+    });
+    Object.defineProperty(navigator, 'requestMIDIAccess', {
+      configurable: true,
+      value: async () => { calls.midi += 1; return { inputs: new Map([['permission-fixture', input]]) }; },
+    });
+    class FixtureAnalyser {
+      fftSize = 512;
+      getByteTimeDomainData(samples: Uint8Array) { samples.fill(128); }
+    }
+    class FixtureAudioContext {
+      createMediaStreamSource() { return { connect: () => undefined }; }
+      createAnalyser() { return new FixtureAnalyser(); }
+      close() { return Promise.resolve(); }
+    }
+    Object.defineProperty(window, 'AudioContext', { configurable: true, value: FixtureAudioContext });
+  });
+  await page.goto('/demo');
+  const calls = () => page.evaluate(() => (window as unknown as { __steadyPermissionCalls: { microphone: number; midi: number } }).__steadyPermissionCalls);
+  expect(await calls()).toEqual({ microphone: 0, midi: 0 });
+  await page.getByRole('button', { name: 'Microphone' }).click();
+  expect(await calls()).toEqual({ microphone: 0, midi: 0 });
+  await page.getByRole('button', { name: 'Start take' }).click();
+  await expect(page.getByText('Play the passage now')).toBeVisible();
+  expect(await calls()).toEqual({ microphone: 1, midi: 0 });
+  await page.getByRole('button', { name: 'Cancel take' }).click();
+  await page.getByRole('button', { name: 'Midi' }).click();
+  expect(await calls()).toEqual({ microphone: 1, midi: 0 });
+  await page.getByRole('button', { name: 'Start take' }).click();
+  await expect(page.getByText('Play any MIDI note')).toBeVisible();
+  expect(await calls()).toEqual({ microphone: 1, midi: 1 });
 });
 
 test('@claim:microphone-detection steady background is ignored and separated impulses are detected', async ({ page }) => {
@@ -273,7 +326,7 @@ test('@claim:controlled-takes controlled marks persist with the saved session', 
   await expect(page.locator('table tbody tr').first().locator('td[data-label="Controlled"]')).toHaveText('1');
 });
 
-test('@claim:demo-isolation sample changes do not read or write real practice data', async ({ page }) => {
+test('@claim:demo-isolation sample changes stay separate and are discarded when starting for real', async ({ page }) => {
   await page.goto('/practice');
   await page.getByLabel('Passage name').fill('Real practice scale');
   await page.getByRole('button', { name: 'Set this passage' }).click();
@@ -283,9 +336,14 @@ test('@claim:demo-isolation sample changes do not read or write real practice da
   await expect(page.getByRole('heading', { name: 'G major crossing', level: 2 })).toBeVisible();
   await expect(page.getByText('Real practice scale')).toHaveCount(0);
   await page.getByRole('button', { name: 'Add a sample session' }).click();
-  await page.goto('/practice');
+  await expect(page.locator('table tbody tr')).toHaveCount(7);
+  await page.getByRole('link', { name: 'Start for real' }).click();
   await expect(page.getByRole('heading', { name: 'Real practice scale', level: 2 })).toBeVisible();
   await expect(page.getByText('Sample session added with 22 ms timing spread.')).toHaveCount(0);
+  expect(await page.evaluate(() => sessionStorage.getItem('demo:steady-take'))).toBeNull();
+  await page.getByRole('link', { name: 'Demo' }).click();
+  await expect(page.locator('table tbody tr')).toHaveCount(6);
+  await expect(page.getByText('Real practice scale')).toHaveCount(0);
 });
 
 test('@claim:storage-fallback data survives reload in localStorage when IndexedDB fails', async ({ page }) => {
@@ -369,4 +427,24 @@ test('@claim:revoked-license a cached full license is locked after a revoked ver
   await expect(page.getByRole('alert')).toHaveText('This license is no longer active. Buy the full version to restore full access.');
   await expect(page.getByRole('button', { name: 'Add passage with full version' })).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem('sb_license:music-practice-stability'))).toBeNull();
+});
+
+test('@claim:offline-license-cache cached full-version access stays active until reconnecting', async ({ page, context }) => {
+  await page.goto('/practice');
+  await page.waitForFunction(async () => {
+    await navigator.serviceWorker.ready;
+    return Boolean(navigator.serviceWorker.controller);
+  });
+  await page.reload();
+  await page.evaluate(() => {
+    localStorage.setItem('sb_license:music-practice-stability', 'offline-paid');
+    localStorage.setItem('sb_license_verdict:music-practice-stability', JSON.stringify({ valid: true, checkedAt: Date.now() - 172_800_000 }));
+  });
+  await context.setOffline(true);
+  await page.reload();
+  await expect(page.getByRole('alert')).toHaveText('Could not check the license. Saved full-version access stays active until you reconnect.');
+  await page.getByLabel('Passage name').fill('Offline license scale');
+  await page.getByRole('button', { name: 'Set this passage' }).click();
+  await expect(page.getByRole('button', { name: 'Add passage', exact: true })).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem('sb_license_verdict:music-practice-stability'))).not.toBeNull();
 });

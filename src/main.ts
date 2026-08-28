@@ -9,7 +9,10 @@ const LICENSE_KEY = `sb_license:${SLUG}`;
 const VERIFY_KEY = `sb_license_verdict:${SLUG}`;
 const API_BASE = 'https://api.sociobot.in/api/v1';
 const CHECKOUT = `${API_BASE}/products/${SLUG}/checkout`;
-const BUILD_ID = 'v1.1.0';
+const BUILD_ID = 'v1.2.0';
+
+type OfflineReadiness = 'preparing' | 'ready' | 'unavailable';
+const supportsServiceWorkers = 'serviceWorker' in navigator;
 
 let data: AppData = { passages: [], sessions: [] };
 let demo = false;
@@ -27,6 +30,9 @@ let referenceMuted = false;
 let referenceBeat = 0;
 let referencePulseCount = 0;
 let referenceAudio: AudioContext | null = null;
+let offlineReadiness: OfflineReadiness = supportsServiceWorkers
+  ? (navigator.serviceWorker.controller ? 'ready' : 'preparing')
+  : 'unavailable';
 
 const escapeHtml = (value: string): string => value.replace(/[&<>'"]/g, (character) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
@@ -191,12 +197,36 @@ function demoResult(sessions: Session[]): string {
   </section>`;
 }
 
+function connectionStatus(): { label: string; state: string } {
+  const controlled = supportsServiceWorkers && Boolean(navigator.serviceWorker.controller);
+  if (controlled) offlineReadiness = 'ready';
+  if (!navigator.onLine) {
+    return controlled
+      ? { label: 'Offline now', state: 'offline' }
+      : { label: 'Offline use is not ready', state: 'not-ready' };
+  }
+  if (controlled && offlineReadiness === 'ready') return { label: 'Ready offline', state: 'ready' };
+  if (offlineReadiness === 'unavailable') return { label: 'Online only', state: 'unavailable' };
+  return { label: 'Preparing offline use', state: 'preparing' };
+}
+
+function updateConnectionStatus(): void {
+  const status = app.querySelector<HTMLElement>('#connection-status');
+  if (!status) return;
+  const connection = connectionStatus();
+  status.dataset.status = connection.state;
+  const dot = document.createElement('span');
+  dot.setAttribute('aria-hidden', 'true');
+  status.replaceChildren(dot, document.createTextNode(connection.label));
+}
+
 function practicePage(): string {
   const selected = setupMode ? null : capture?.passage ?? data.passages.find((passage) => passage.id === selectedPassageId) ?? data.passages[0] ?? null;
   const related = selected ? data.sessions.filter((session) => session.passageId === selected.id) : [];
   const headline = demo ? 'Review sample timing improvement' : 'Measure your next six takes';
+  const connection = connectionStatus();
   return `${header()}<main id="main" class="practice-page" tabindex="-1">
-    <section class="practice-heading"><div><p class="eyebrow"><span>01</span> ${demo ? 'Sample timing history' : 'Practice instrument'}</p><h1 tabindex="-1">${headline}</h1><p>${demo ? 'See the measured result first, then try the controls with sample data.' : 'Set one short passage, then repeat it with the same pulse.'}</p></div><div class="offline-pill" id="connection-status"><span></span>${navigator.onLine ? 'Ready offline' : 'Offline now'}</div></section>
+    <section class="practice-heading"><div><p class="eyebrow"><span>01</span> ${demo ? 'Sample timing history' : 'Practice instrument'}</p><h1 tabindex="-1">${headline}</h1><p>${demo ? 'See the measured result first, then try the controls with sample data.' : 'Set one short passage, then repeat it with the same pulse.'}</p></div><div class="offline-pill" id="connection-status" data-status="${connection.state}" role="status" aria-label="Offline availability"><span></span>${connection.label}</div></section>
     ${messages()}
     ${demo ? demoResult(related) : ''}
     ${!selected ? passageSetup() : `${passagePicker(selected)}${practiceInstrument(selected)}${historySection(selected, related)}`}
@@ -255,7 +285,7 @@ function practiceInstrument(passage: Passage): string {
 }
 
 function inputHelp(mode: InputMode): string {
-  if (mode === 'microphone') return 'You will approve microphone access before recording.';
+  if (mode === 'microphone') return 'Start a microphone take to use this input.';
   if (mode === 'midi') return 'Connect a MIDI instrument before starting.';
   return 'The first tap starts the clock. Each later tap adds an attack.';
 }
@@ -280,7 +310,7 @@ function dataControls(): string {
 function legalPage(kind: 'privacy' | 'terms'): string {
   const privacy = kind === 'privacy';
   return `${header()}<main id="main" class="legal-page" tabindex="-1"><p class="eyebrow">Steady Take · ${privacy ? 'Privacy' : 'Terms'}</p><h1 tabindex="-1">${privacy ? 'How Steady Take handles data' : 'Terms for using Steady Take'}</h1><p class="lede">Effective August 28, 2026</p>
-    ${privacy ? `<section><h2>What stays on this device</h2><p>Passage names, attack times, controlled marks, and settings are stored in your browser. Audio is analysed in memory and is not recorded.</p><h2>Network requests</h2><p>The installed app checks this site for updates. License verification contacts Sociobot only after you enter or buy a license.</p><h2>Microphone and MIDI</h2><p>Your browser asks before sharing microphone or MIDI access. You can remove access in your browser settings.</p><h2>Delete or export</h2><p>Use the practice page to export or clear your history. Clearing site storage also removes it.</p>` : `<section><h2>What this tool provides</h2><p>Steady Take reports attack timing and timing spread. It does not show MIDI note names or technique feedback.</p><h2>One-time purchase</h2><p>The full version costs $12 as a one-time purchase. Dodo hosts checkout and handles payment through Sociobot.</p><p>A revoked license stops full-version access.</p><h2>Your responsibility</h2><p>Keep a backup if the history matters to you. Browsers can remove local data during cleanup.</p><h2>Fair use</h2><p>Do not probe, disrupt, or misuse the license service. These terms may change with a new product version.</p>`}<h2>Contact</h2><p>Email <a href="mailto:support@sociobot.in">support@sociobot.in</a> with privacy, license, or product questions.</p></section>
+    ${privacy ? `<section><h2>What stays on this device</h2><p>Passage names, attack times, controlled marks, and settings are stored in your browser. Audio is analysed in memory and is not recorded.</p><h2>Network requests</h2><p>The installed app checks this site for updates. License verification contacts Sociobot only after you enter or buy a license.</p><h2>Microphone and MIDI</h2><p>Steady Take requests microphone or MIDI access only when you start that input.</p><h2>Delete or export</h2><p>Use the practice page to export or clear your history. Clearing site storage also removes it.</p>` : `<section><h2>What this tool provides</h2><p>Steady Take reports attack timing and timing spread. It does not show MIDI note names or technique feedback.</p><h2>One-time purchase</h2><p>The full version costs $12 as a one-time purchase. Dodo hosts checkout and handles payment through Sociobot.</p><p>A revoked license stops full-version access.</p><h2>Your responsibility</h2><p>Keep a backup if the history matters to you. Browsers can remove local data during cleanup.</p><h2>Fair use</h2><p>Do not probe, disrupt, or misuse the license service. These terms may change with a new product version.</p>`}<h2>Contact</h2><p>Email <a href="mailto:support@sociobot.in">support@sociobot.in</a> with privacy, license, or product questions.</p></section>
   </main>${footer()}`;
 }
 
@@ -325,7 +355,10 @@ async function navigate(path: string): Promise<void> {
   notice = '';
   errorMessage = '';
   history.pushState({}, '', path);
-  if (wasDemo && !isDemoLocation()) await initialiseLicense();
+  if (wasDemo && !isDemoLocation()) {
+    resetDemo();
+    await initialiseLicense();
+  }
   await render(true);
 }
 
@@ -631,19 +664,31 @@ document.addEventListener('keydown', (event) => {
 addEventListener('popstate', () => {
   const wasDemo = demo;
   stopInputs(); stopReferencePulse(false); capture = null;
-  if (wasDemo && !isDemoLocation()) void initialiseLicense().then(() => render(true));
+  if (wasDemo && !isDemoLocation()) {
+    resetDemo();
+    void initialiseLicense().then(() => render(true));
+  }
   else void render(true);
 });
 addEventListener('online', () => { notice = 'Connection restored. Your practice data stayed available.'; void render(); });
 addEventListener('offline', () => { notice = 'You are offline. Practice and saved history still work.'; void render(); });
 
-if ('serviceWorker' in navigator) {
+if (supportsServiceWorkers) {
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    offlineReadiness = navigator.serviceWorker.controller ? 'ready' : 'preparing';
+    updateConnectionStatus();
+  });
   addEventListener('load', () => navigator.serviceWorker.register('/sw.js').then((registration) => {
+    offlineReadiness = navigator.serviceWorker.controller ? 'ready' : 'preparing';
+    updateConnectionStatus();
     registration.addEventListener('updatefound', () => {
       const worker = registration.installing;
       worker?.addEventListener('statechange', () => { if (worker.state === 'installed' && navigator.serviceWorker.controller) { notice = 'An update is ready. Reload when you finish this take.'; void render(); } });
     });
-  }).catch(() => { /* The app still works without installation support. */ }));
+  }).catch(() => {
+    offlineReadiness = 'unavailable';
+    updateConnectionStatus();
+  }));
 }
 
 await initialiseLicense();

@@ -36,6 +36,15 @@ test('desktop first screen includes all three product facts', async ({ page }) =
   }
 });
 
+test('offline availability never claims readiness without service-worker control', async ({ browser }) => {
+  const context = await browser.newContext({ serviceWorkers: 'block' });
+  const page = await context.newPage();
+  await page.goto('http://127.0.0.1:4173/practice');
+  await expect(page.locator('#connection-status')).toHaveText('Online only');
+  expect(await page.evaluate(() => navigator.serviceWorker.controller)).toBeNull();
+  await context.close();
+});
+
 test('each route has specific metadata and navigation restores focus', async ({ page }) => {
   const routes = [
     ['/', 'Steady Take — measure timing consistency'],
@@ -127,27 +136,6 @@ test('a legacy malformed stored record is cleared so the practice page can recov
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Set your first passage' })).toBeVisible();
   expect(errors).toEqual([]);
-});
-
-test('cached valid full access stays active when a daily license check is offline', async ({ page, context }) => {
-  await page.goto('/practice');
-  await page.waitForFunction(async () => {
-    await navigator.serviceWorker.ready;
-    return Boolean(navigator.serviceWorker.controller);
-  });
-  // Give the active worker one controlled navigation before disconnecting.
-  await page.reload();
-  await page.evaluate(() => {
-    localStorage.setItem('sb_license:music-practice-stability', 'offline-paid');
-    localStorage.setItem('sb_license_verdict:music-practice-stability', JSON.stringify({ valid: true, checkedAt: Date.now() - 172_800_000 }));
-  });
-  await context.setOffline(true);
-  await page.reload();
-  await expect(page.getByRole('alert')).toHaveText('Could not check the license. Saved full-version access stays active until you reconnect.');
-  await page.getByLabel('Passage name').fill('Offline license scale');
-  await page.getByRole('button', { name: 'Set this passage' }).click();
-  await expect(page.getByRole('button', { name: 'Add passage', exact: true })).toBeVisible();
-  expect(await page.evaluate(() => localStorage.getItem('sb_license_verdict:music-practice-stability'))).not.toBeNull();
 });
 
 test('static 404 has the standard skeleton, 44px controls, and no 200% text overflow', async ({ page }) => {

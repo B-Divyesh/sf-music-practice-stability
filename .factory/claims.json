@@ -9,9 +9,9 @@
   {
     "id": "offline-reload",
     "claim": "Works offline after the first visit",
-    "where": "landing facts and README",
+    "where": "landing facts, README, and practice connection status",
     "test": "npm test -- --grep @claim:offline-reload",
-    "sandbox": "fresh browser context at /demo; wait for service worker, set offline, reload, and assert the seeded passage"
+    "sandbox": "fresh browser context at /demo; assert Preparing offline use before service-worker control, Ready offline after control, then set offline, reload, and assert the seeded passage"
   },
   {
     "id": "update-check",
@@ -40,6 +40,13 @@
     "where": "landing steps, practice input selector, and README",
     "test": "npm test -- --grep @claim:input-options",
     "sandbox": "fresh /demo session with a fake microphone and MIDI input; start microphone capture and record a full MIDI take"
+  },
+  {
+    "id": "permission-on-demand",
+    "claim": "Steady Take requests microphone or MIDI access only when you start that input",
+    "where": "privacy page and practice microphone help",
+    "test": "npm test -- --grep @claim:permission-on-demand",
+    "sandbox": "fresh /demo session with spies on getUserMedia and requestMIDIAccess; assert zero calls before Start take and one call after each selected input starts"
   },
   {
     "id": "microphone-detection",
@@ -120,10 +127,10 @@
   },
   {
     "id": "demo-isolation",
-    "claim": "Demo mode never reads or writes real practice data",
-    "where": "README and demo banner",
+    "claim": "Demo mode never reads or writes real practice data, and Start for real discards sample changes",
+    "where": "README, demo banner, and Start for real action",
     "test": "npm test -- --grep @claim:demo-isolation",
-    "sandbox": "fresh browser context; create real data, change demo data, then assert each mode retains only its own data"
+    "sandbox": "fresh browser context; create real data, change demo data, select Start for real, revisit demo, and assert real data remains separate while the six-session sample resets"
   },
   {
     "id": "storage-fallback",
@@ -159,5 +166,12 @@
     "where": "terms page",
     "test": "npm test -- --grep @claim:revoked-license",
     "sandbox": "fresh browser context; activate a valid fixture license, expire its cached verdict, return a revoked fixture, and assert full access is removed"
+  },
+  {
+    "id": "offline-license-cache",
+    "claim": "Saved full-version access stays active until you reconnect when a license check cannot run",
+    "where": "offline license error state",
+    "test": "npm test -- --grep @claim:offline-license-cache",
+    "sandbox": "fresh browser context; activate a cached valid fixture license, age its verdict, go offline, reload, and assert full access remains active"
   }
 ]

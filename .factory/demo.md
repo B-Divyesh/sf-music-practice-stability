@@ -10,8 +10,8 @@ Each session has six realistic takes and controlled marks.
 
 Demo state uses the `demo:steady-take` key in `sessionStorage`. It never reads
 or writes the IndexedDB database used by real practice. “Reset demo” removes
-that key and restores the bundled sample. “Start for real” leaves demo mode;
-sample changes are discarded when the tab closes.
+that key and restores the bundled sample. “Start for real” removes that key
+before opening real practice, so sample changes are discarded immediately.
 
 The service worker packages the sample in JavaScript, so `/?demo=1` can reload
 offline after the first connected visit. Verifiers can add a sample session,
