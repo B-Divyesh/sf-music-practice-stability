@@ -4,7 +4,7 @@ Date: 2026-08-28 UTC
 
 Work order: `music-practice-stability-polish-2`
 
-Repair commit: `PENDING-COMMIT`
+Repair commit: `7cdbec4bfad1d51c95cf1e8a91bd4881ae272410`
 
 Production: <https://music-practice-stability.sociobot.in>
 
@@ -35,8 +35,9 @@ when the external refund policy could not be honestly proven.
 - Local full suite: `npm test` — 80 passing desktop/mobile Playwright tests.
 - Type and production build: `npx tsc --noEmit` and `npm run build` passed.
   Current production assets: JavaScript 12.51 kB gzip; CSS 5.97 kB gzip.
-- Claims: 23 IDs in `.factory/claims.json`; all exact commands were run from a
-  clean clone at `PENDING-CLEAN-CLONE` in Chromium and mobile.
+- Claims: 23 IDs in `.factory/claims.json`; all exact commands passed from the
+  clean clone at `/tmp/steady-take-polish2-clean-HzfzOd/repo` in Chromium and
+  mobile (46 claim executions).
 - Accessibility: Axe serious/critical checks pass for `/`, `/practice`, `/demo`,
   `/privacy`, `/terms`, and static `/404.html`; keyboard skip-link, route focus,
   touch targets, reduced motion, 200% text, metadata, and mobile overflow are
