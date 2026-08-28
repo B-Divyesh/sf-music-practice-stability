@@ -61,5 +61,26 @@
     "where": "paid section and README",
     "test": "npm test -- --grep @claim:paid-passages",
     "sandbox": "fresh browser context with a fixture verify response; activate a license and save two passages"
+  },
+  {
+    "id": "controlled-takes",
+    "claim": "You can mark a take as controlled",
+    "where": "landing steps and practice take controls",
+    "test": "npm test -- --grep @claim:controlled-takes",
+    "sandbox": "fresh /demo session; capture a take, mark it controlled, save six takes, and assert the saved controlled count"
+  },
+  {
+    "id": "demo-isolation",
+    "claim": "Demo mode never reads or writes real practice data",
+    "where": "README and demo banner",
+    "test": "npm test -- --grep @claim:demo-isolation",
+    "sandbox": "fresh browser context; create real data, change demo data, then assert each mode retains only its own data"
+  },
+  {
+    "id": "audio-not-recorded",
+    "claim": "Audio is analysed in memory and is not recorded",
+    "where": "landing limits, privacy page, and README",
+    "test": "npm test -- --grep @claim:audio-not-recorded",
+    "sandbox": "fresh /demo session with fake microphone; begin and cancel microphone capture, assert no MediaRecorder is created and no audio file or network request is made"
   }
 ]

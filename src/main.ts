@@ -9,7 +9,7 @@ const LICENSE_KEY = `sb_license:${SLUG}`;
 const VERIFY_KEY = `sb_license_verdict:${SLUG}`;
 const API_BASE = 'https://api.sociobot.in/api/v1';
 const CHECKOUT = `${API_BASE}/products/${SLUG}/checkout`;
-const BUILD_ID = 'v1.0.0';
+const BUILD_ID = 'v1.0.1';
 
 let data: AppData = { passages: [], sessions: [] };
 let demo = false;
@@ -60,7 +60,7 @@ function header(): string {
 function footer(): string {
   return `<footer class="site-footer">
     <p><strong>Steady Take</strong><br><span>Measure timing stability across repeated takes.</span></p>
-    <nav aria-label="Footer navigation"><a href="/privacy" data-nav>Privacy</a><a href="/terms" data-nav>Terms</a><a href="https://paramfactory.com" rel="external">Built by Param Factory <span class="sr-only">(external)</span></a></nav>
+    <nav aria-label="Footer navigation"><a href="/privacy" data-nav>Privacy</a><a href="/terms" data-nav>Terms</a><a href="https://hello-factory.sociobot.in/" rel="external">Built by Param Factory <span class="sr-only">(external)</span></a></nav>
     <p class="build">${BUILD_ID} · Generated artwork</p>
   </footer>`;
 }
@@ -68,7 +68,7 @@ function footer(): string {
 function messages(): string {
   return `<div class="message-stack" aria-live="polite">
     ${notice ? `<p class="notice">${escapeHtml(notice)}</p>` : ''}
-    ${errorMessage ? `<p class="error">${escapeHtml(errorMessage)}</p>` : ''}
+    ${errorMessage ? `<p class="error" role="alert">${escapeHtml(errorMessage)}</p>` : ''}
   </div>`;
 }
 
@@ -113,7 +113,7 @@ function landing(): string {
     </section>
     <section class="paid-section" aria-labelledby="paid-title">
       <div class="price-stamp"><span>One time</span><strong>$12</strong></div>
-      <div><p class="eyebrow"><span>05</span> Full version</p><h2 id="paid-title">Keep every passage</h2><p>Practice one passage free. The full version adds unlimited saved passages and complete history.</p>
+      <div><p class="eyebrow"><span>05</span> Full version</p><h2 id="paid-title">Keep every passage</h2><p>Practice one passage free. The full version adds unlimited saved passages.</p>
       <div class="paid-actions"><a class="button secondary" href="${CHECKOUT}">Buy the full version</a><button class="text-button" data-action="show-license">Have a license?</button></div>
       <form id="license-form" class="license-form hidden"><label for="license-token">License token</label><div><input id="license-token" name="license" autocomplete="off" required><button class="button small" type="submit">Verify license</button></div><p>Sociobot is the merchant of record. Purchase terms apply.</p></form></div>
     </section>
@@ -160,7 +160,7 @@ function passageSetup(): string {
 function passageForm(passage?: Passage): string {
   return `<form id="passage-form" class="passage-form">
     <input type="hidden" name="passageId" value="${passage?.id ?? ''}">
-    <label>Passage name<input name="name" maxlength="48" required placeholder="G major crossing" value="${passage ? escapeHtml(passage.name) : ''}"></label>
+    <label>Passage name<input name="name" maxlength="48" required aria-describedby="passage-name-help" placeholder="G major crossing" value="${passage ? escapeHtml(passage.name) : ''}"><span id="passage-name-help">Use at least one letter or number.</span></label>
     <label>Tempo<input name="bpm" type="number" min="30" max="220" value="${passage?.bpm ?? 72}" required><span>BPM</span></label>
     <label>Attacks per take<select name="beats">${[2,3,4,5,6,7,8].map((beats) => `<option ${beats === (passage?.beats ?? 4) ? 'selected' : ''}>${beats}</option>`).join('')}</select></label>
     <button class="button primary" type="submit">${passage ? 'Save passage settings' : 'Set this passage'}</button>
@@ -455,7 +455,17 @@ app.addEventListener('submit', async (event) => {
     const existingId = String(values.get('passageId'));
     const existing = data.passages.find((passage) => passage.id === existingId);
     if (!existing && data.passages.length >= 1 && !isPaid && !demo) { errorMessage = 'The free version saves one passage. Buy the full version to keep another.'; await render(); return; }
-    const passage: Passage = { id: existing?.id ?? id(), name: String(values.get('name')).trim(), bpm: Number(values.get('bpm')), beats: Number(values.get('beats')), createdAt: existing?.createdAt ?? new Date().toISOString() };
+    const name = String(values.get('name')).trim();
+    if (!name) {
+      errorMessage = 'Enter a passage name, then save the passage.';
+      const nameInput = form.elements.namedItem('name') as HTMLInputElement;
+      nameInput.setCustomValidity(errorMessage);
+      nameInput.reportValidity();
+      await render();
+      requestAnimationFrame(() => app.querySelector<HTMLInputElement>('[name="name"]')?.focus());
+      return;
+    }
+    const passage: Passage = { id: existing?.id ?? id(), name, bpm: Number(values.get('bpm')), beats: Number(values.get('beats')), createdAt: existing?.createdAt ?? new Date().toISOString() };
     if (existing) data.passages[data.passages.indexOf(existing)] = passage; else data.passages.push(passage);
     selectedPassageId = passage.id; setupMode = null; await saveData(data, demo); capture = { passage, mode: 'tap', takes: [], recording: false, currentOnsets: [], takeStartedAt: 0 }; notice = `${passage.name} is ready.`; await render();
   }

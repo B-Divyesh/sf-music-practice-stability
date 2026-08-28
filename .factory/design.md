@@ -59,8 +59,11 @@ baseline over 180 ms. A completed take settles with one 240 ms horizontal snap.
 Nothing loops. With `prefers-reduced-motion: reduce`, transforms and smooth
 scrolling are removed and state changes are instant.
 
-Focus uses a 3 px gold ring with a 3 px paper offset. Every target is at least
-44 px. Charts include a written summary and a data table.
+Focus uses a 3 px ochre ring (`#785600`) with a 3 px paper offset; it measures
+5.90:1 against paper and 3.08:1 against the gold demo bar. Dark instrument and
+footer surfaces use a warm pale-gold ring (`#F7DA71`, 9.44:1 against night).
+Every target is at least 44 px. Charts include a written summary and a data
+table.
 
 ## Asset plan and provenance
 

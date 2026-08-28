@@ -125,3 +125,46 @@ test('@claim:paid-passages valid license permits a second saved passage', async 
   await page.getByRole('button', { name: 'Set this passage' }).click();
   await expect(page.locator('.passage-picker>div button')).toHaveCount(2);
 });
+
+test('@claim:controlled-takes controlled marks persist with the saved session', async ({ page }) => {
+  await page.goto('/demo');
+  for (let take = 0; take < 6; take += 1) {
+    await page.getByRole('button', { name: /Start take/ }).click();
+    for (let attack = 0; attack < 4; attack += 1) await page.keyboard.press('Space');
+    if (take === 0) await page.getByRole('checkbox', { name: 'Controlled' }).check();
+  }
+  await page.getByRole('button', { name: 'Save this session' }).click();
+  await expect(page.locator('table tbody tr').first().locator('td[data-label="Controlled"]')).toHaveText('1');
+});
+
+test('@claim:demo-isolation sample changes do not read or write real practice data', async ({ page }) => {
+  await page.goto('/practice');
+  await page.getByLabel('Passage name').fill('Real practice scale');
+  await page.getByRole('button', { name: 'Set this passage' }).click();
+  await page.goto('/demo');
+  await expect(page.getByRole('heading', { name: 'G major crossing', level: 2 })).toBeVisible();
+  await expect(page.getByText('Real practice scale')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Add a sample session' }).click();
+  await page.goto('/practice');
+  await expect(page.getByRole('heading', { name: 'Real practice scale', level: 2 })).toBeVisible();
+  await expect(page.getByText('Sample session added with 22 ms timing spread.')).toHaveCount(0);
+});
+
+test('@claim:audio-not-recorded microphone capture creates no recording or audio request', async ({ page, context }) => {
+  const external: string[] = [];
+  await context.grantPermissions(['microphone'], { origin: 'http://127.0.0.1:4173' });
+  await page.addInitScript(() => {
+    Object.defineProperty(window, '__steadyRecorderCalls', { value: 0, writable: true });
+    Object.defineProperty(window, 'MediaRecorder', { configurable: true, value: class { constructor() { (window as unknown as { __steadyRecorderCalls: number }).__steadyRecorderCalls += 1; } } });
+  });
+  page.on('request', (request) => {
+    if (new URL(request.url()).origin !== 'http://127.0.0.1:4173') external.push(request.url());
+  });
+  await page.goto('/demo');
+  await page.getByRole('button', { name: 'Microphone' }).click();
+  await page.getByRole('button', { name: 'Start take' }).click();
+  await expect(page.getByText('Play the passage now')).toBeVisible();
+  await page.getByRole('button', { name: 'Cancel take' }).click();
+  expect(await page.evaluate(() => (window as unknown as { __steadyRecorderCalls: number }).__steadyRecorderCalls)).toBe(0);
+  expect(external).toEqual([]);
+});

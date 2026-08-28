@@ -1,7 +1,8 @@
-const VERSION = 'steady-take-v1';
-const SHELL = `${VERSION}-shell`;
-const RUNTIME = `${VERSION}-runtime`;
-const PRECACHE = ['/', '/practice', '/demo', '/privacy', '/terms', '/offline.html', '/manifest.webmanifest', '/favicon.svg', '/assets/app.js', '/assets/app.css', '/assets/steady-timing-hero-768.webp', '/assets/fraunces-latin.woff2', '/icons/icon-192.png', '/icons/icon-512.png'];
+export function serviceWorkerSource(version: string, precache: string[]): string {
+  return `const VERSION = ${JSON.stringify(version)};
+const SHELL = \`${'${VERSION}'}-shell\`;
+const RUNTIME = \`${'${VERSION}'}-runtime\`;
+const PRECACHE = ${JSON.stringify(precache)};
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(SHELL).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting()));
@@ -29,3 +30,5 @@ self.addEventListener('fetch', (event) => {
     return response;
   })));
 });
+`;
+}
