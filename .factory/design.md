@@ -21,7 +21,7 @@ stable. Browser and installed-app chrome are painted `#F4F0E6`.
 | Ink | `--ink` | `#132A32` | primary text and strokes |
 | Muted ink | `--ink-soft` | `#526166` | secondary text |
 | Night | `--night` | `#18353C` | practice instrument |
-| Coral | `--coral` | `#D84F3F` | primary actions and timing points |
+| Coral | `--coral` | `#C84034` | primary actions and timing points |
 | Coral dark | `--coral-dark` | `#A92F25` | hover and focus contrast |
 | Mint | `--mint` | `#A7CFB4` | controlled state |
 | Gold | `--gold` | `#D8A928` | listening and warning |
@@ -90,4 +90,3 @@ Generated with the factory image deployment through
 sidecar live in `assets/src/`. Shipping WebP derivatives are ≤300 KB. Other
 marks, charts, favicon, and PWA icons are hand-authored product-specific SVG or
 canvas geometry under the MIT project license.
-

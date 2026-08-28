@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://music-practice-stability.sociobot.in/sitemap.xml
