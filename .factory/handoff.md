@@ -1,74 +1,55 @@
-# Steady Take polish 2 handoff
+# Steady Take review 3 handoff
 
 Date: 2026-08-28 UTC
 
-Work order: `music-practice-stability-polish-2`
+Work order: music-practice-stability-review-3
 
-Repair commit: `7cdbec4bfad1d51c95cf1e8a91bd4881ae272410`
-
-Production: <https://music-practice-stability.sociobot.in>
-
-Demo: <https://music-practice-stability.sociobot.in/?demo=1>
+Candidate reviewed: 9bfb696e9c1058f1308f013072341c82cf33b07a
 
 ## Outcome
 
-**PASS — every finding in review 1 and review 2 is closed.** The four review-2
-unlisted claims are now either covered by an observable sandbox test or removed
-when the external refund policy could not be honestly proven.
+**FAIL — four findings remain: one blocking and three major.** The complete
+report is .factory/review-3.md. No product code was changed.
 
-## Changes
+The blocking finding is that demo changes survive **Start for real** and return
+on the next demo visit. The major findings are a premature “Ready offline”
+status and two reachable but unregistered claim groups covering device-access
+timing and cached paid access while offline.
 
-- Rewrote and tested the scope boundary: the MIDI fixture demonstrates that
-  saved/exported results contain attack timing and timing spread, not note names
-  or technique feedback.
-- Registered the same-origin installed-app update check and browser-site-storage
-  deletion behavior as claims.
-- Explicitly closes IndexedDB connections after every read/write so browser data
-  deletion is not blocked by this app.
-- Removed the unprovable statement assigning refund handling to Dodo/Sociobot.
-- Preserved the distinct measured-geometry visual system, one-click isolated
-  sample path, persistent demo banner/reset, routing, 404, responsive layout,
-  PWA/offline behavior, and prior-review closures.
+## Verification performed
 
-## Evidence
+- Cold live first read at 390 × 844 and 1440 × 900.
+- One-click demo, seeded first viewport, reset, real/demo isolation, exit and
+  re-entry, same-origin request log, and live offline reload.
+- Direct loads, real 404, metadata, h1/main counts, links, hosted checkout,
+  SPA Back/focus, live Axe, 44 px targets, and factory URL verification.
+- Every one of the 23 exact claim commands from .factory/claims.json ran
+  separately in a no-local clean clone; all 46 desktop/mobile executions passed.
+- Full clean-clone npm test: 79 passed, one intentional duplicate-config check
+  skipped.
+- Clean-clone npm run build: passed; dist/ produced; application JavaScript
+  12.51 kB gzip.
+- All 20 findings from reviews 1 and 2 were independently confirmed fixed under
+  their original IDs.
 
-- Local full suite: `npm test` — 80 passing desktop/mobile Playwright tests.
-- Type and production build: `npx tsc --noEmit` and `npm run build` passed.
-  Current production assets: JavaScript 12.51 kB gzip; CSS 5.97 kB gzip.
-- Claims: 23 IDs in `.factory/claims.json`; all exact commands passed from the
-  clean clone at `/tmp/steady-take-polish2-clean-HzfzOd/repo` in Chromium and
-  mobile (46 claim executions).
-- Accessibility: Axe serious/critical checks pass for `/`, `/practice`, `/demo`,
-  `/privacy`, `/terms`, and static `/404.html`; keyboard skip-link, route focus,
-  touch targets, reduced motion, 200% text, metadata, and mobile overflow are
-  covered by `tests/e2e/quality.spec.ts`.
-- Live mobile Lighthouse: performance 95, accessibility 100, best practices
-  100, SEO 100; LCP 1.5 s, CLS 0, and total blocking time 260 ms.
-- PWA/offline/privacy: claim tests cover offline demo reload, same-origin demo
-  traffic, audio-not-recorded, demo isolation, license-on-demand, and the
-  same-origin service-worker update check.
-- Screenshots: `.factory/evidence/polish-2-local/` (home desktop, demo mobile,
-  practice, privacy, terms, and 404). Finding-level mapping is in
-  `.factory/polish-2.md`.
-- Deployment: Static Web Apps deployment
-  `20580192-a9d0-4906-8002-ee4fc27f41f0` completed successfully. Cold live
-  checks are in `.factory/evidence/polish-2-live/live-qa.json` and the route
-  verifier outputs in the same directory. At 390 × 844, the live demo result
-  ends at y=719, so it is visible without scrolling.
+## Reproduce
 
-## Run and verify
-
-```sh
+~~~sh
 npm ci
 npm test
 npm run build
-```
+~~~
 
-Run every exact command in `.factory/claims.json` from a clean clone. The demo
-is `/?demo=1`; it uses only `sessionStorage["demo:steady-take"]` and never reads
-or writes real IndexedDB practice data.
+Live issue checks:
 
-## Known gaps
+1. Open /demo, add a sample session, select **Start for real**, then return to
+   /demo; seven rows return because demo:steady-take was not discarded.
+2. Open /practice in a fresh context with service workers blocked; “Ready
+   offline” appears with no controller or registration.
+3. Compare the privacy/practice permission wording and cached-license offline
+   message with .factory/claims.json; neither promise has a claim entry.
 
-None. No AI feature is appropriate for this local-first timing-measurement
-product.
+## Next steps
+
+Resolve F-3-1 through F-3-4 exactly as specified in the review, add the missing
+claim coverage, and repeat the complete review. There are no other known gaps.
