@@ -184,9 +184,10 @@ function demoResult(sessions: Session[]): string {
   const first = values[0];
   const latest = values.at(-1);
   const change = improvement(shown);
+  const sessionCount = shown.length === 6 ? 'six' : String(shown.length);
   return `<section class="demo-result" aria-labelledby="demo-result-title">
-    <div><p class="eyebrow">Sample result</p><h2 id="demo-result-title">Latest spread: ${latest} ms</h2><p>Down from ${first} ms across ${shown.length} sessions. That is ${change}% lower.</p></div>
-    <svg viewBox="0 0 100 44" role="img" aria-label="Timing spread falls from ${first} to ${latest} milliseconds across ${shown.length} sessions"><path d="M8 9H92 M8 23H92 M8 37H92"/><polyline points="${points}"/>${values.map((value, index) => `<circle cx="${8 + index * (84 / Math.max(values.length - 1, 1))}" cy="${37 - value / max * 28}" r="2.5"/>`).join('')}</svg>
+    <div><p class="eyebrow">Sample result</p><h2 id="demo-result-title">Latest spread: ${latest} ms</h2><p>Down from ${first} ms across ${sessionCount} sessions. That is ${change}% lower.</p></div>
+    <svg viewBox="0 0 100 44" role="img" aria-label="Timing spread falls from ${first} to ${latest} milliseconds across ${sessionCount} sessions"><path d="M8 9H92 M8 23H92 M8 37H92"/><polyline points="${points}"/>${values.map((value, index) => `<circle cx="${8 + index * (84 / Math.max(values.length - 1, 1))}" cy="${37 - value / max * 28}" r="2.5"/>`).join('')}</svg>
   </section>`;
 }
 
