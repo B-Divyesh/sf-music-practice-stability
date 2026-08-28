@@ -26,6 +26,47 @@ test('mobile layout has no horizontal overflow and keyboard path works', async (
   await expect(page.locator('#main')).toBeFocused();
 });
 
+test('desktop first screen includes all three product facts', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  for (const fact of ['Audio stays on this device.', 'Works offline after the first visit.', 'Free for one saved passage.']) {
+    const box = await page.locator('.fact-list li').filter({ hasText: fact }).boundingBox();
+    expect(box, `${fact} is rendered`).not.toBeNull();
+    expect(box!.y + box!.height, `${fact} is inside the first viewport`).toBeLessThanOrEqual(900);
+  }
+});
+
+test('each route has specific metadata and navigation restores focus', async ({ page }) => {
+  const routes = [
+    ['/', 'Steady Take — measure timing consistency'],
+    ['/practice', 'Practice timing — Steady Take'],
+    ['/?demo=1', 'Demo — Steady Take'],
+    ['/privacy', 'Privacy — Steady Take'],
+    ['/terms', 'Terms — Steady Take'],
+    ['/missing-page', 'Page not found — Steady Take'],
+  ] as const;
+  const descriptions = new Set<string>();
+  for (const [path, title] of routes) {
+    await page.goto(path);
+    await expect(page).toHaveTitle(title);
+    const description = await page.locator('meta[name="description"]').getAttribute('content');
+    const ogTitle = await page.locator('meta[property="og:title"]').getAttribute('content');
+    const ogDescription = await page.locator('meta[property="og:description"]').getAttribute('content');
+    const twitterTitle = await page.locator('meta[name="twitter:title"]').getAttribute('content');
+    expect(description?.length).toBeGreaterThan(20);
+    expect(ogTitle).toBe(title);
+    expect(ogDescription).toBe(description);
+    expect(twitterTitle).toBe(title);
+    descriptions.add(description!);
+  }
+  expect(descriptions.size).toBe(routes.length);
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Privacy', exact: true }).first().click();
+  await expect(page.getByRole('heading', { level: 1 })).toBeFocused();
+  await page.goBack();
+  await expect(page.getByRole('heading', { level: 1 })).toBeFocused();
+});
+
 test('whitespace-only passage names are rejected with an announced recovery message', async ({ page }) => {
   await page.goto('/practice');
   await page.getByLabel('Passage name').fill('   ');
@@ -113,7 +154,10 @@ test('static 404 has the standard skeleton, 44px controls, and no 200% text over
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/404.html');
   await expect(page.locator('header, main, footer')).toHaveCount(3);
-  await expect(page.getByRole('heading', { name: 'This page missed the count', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Page not found', level: 1 })).toBeVisible();
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /Steady Take page/);
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', 'Page not found — Steady Take');
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', '/favicon.svg');
   await page.evaluate(() => { document.documentElement.style.fontSize = '32px'; });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   const undersized = await page.locator('a').evaluateAll((elements) => elements.map((element) => {
@@ -140,7 +184,7 @@ test('static host config preserves real 404s and immutable hashed assets', ({}, 
 
 test('@claim:full-version-price hosted checkout states the exact one-time purchase', async ({ page }) => {
   await page.goto('/demo');
-  await expect(page.getByRole('heading', { name: 'Explore a steadier passage', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Review sample timing improvement', level: 1 })).toBeVisible();
   const response = await fetch('https://api.sociobot.in/api/v1/products/music-practice-stability/checkout', { redirect: 'manual' });
   expect(response.status).toBe(303);
   const checkoutUrl = response.headers.get('location');

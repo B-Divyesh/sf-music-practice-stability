@@ -54,10 +54,15 @@ in one thumb-friendly column. History tables switch to labeled blocks.
 
 ## Interaction grammar and motion
 
-Buttons depress two pixels like a metronome key. New onset marks grow from their
+Buttons depress two pixels like a metronome key. New attack marks grow from their
 baseline over 180 ms. A completed take settles with one 240 ms horizontal snap.
 Nothing loops. With `prefers-reduced-motion: reduce`, transforms and smooth
 scrolling are removed and state changes are instant.
+
+The optional reference pulse uses the same circular timing marks as the charts.
+Only the current beat changes fill, so the control explains tempo without adding
+a separate visual language. The pulse has explicit sound, mute, and stop states;
+reduced-motion mode changes the mark instantly.
 
 Focus uses a 3 px ochre ring (`#785600`) with a 3 px paper offset; it measures
 5.90:1 against paper and 3.08:1 against the gold demo bar. Dark instrument and

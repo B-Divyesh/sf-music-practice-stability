@@ -4,7 +4,7 @@
     "claim": "The sample shows six sessions and a 52% drop in timing spread",
     "where": "landing first screen and demo trend",
     "test": "npm test -- --grep @claim:sample-improvement",
-    "sandbox": "fresh browser context at /demo; assert six seeded rows, latest 26 ms, and 52% lower summary"
+    "sandbox": "fresh 390x844 browser context at /?demo=1; assert the 26 ms result, six-session change, and chart are visible without scrolling"
   },
   {
     "id": "offline-reload",
@@ -33,6 +33,20 @@
     "where": "landing steps, practice input selector, and README",
     "test": "npm test -- --grep @claim:input-options",
     "sandbox": "fresh /demo session with a fake microphone and MIDI input; start microphone capture and record a full MIDI take"
+  },
+  {
+    "id": "microphone-detection",
+    "claim": "Microphone mode detects separated loud attacks above steady background input",
+    "where": "landing limits and README",
+    "test": "npm test -- --grep @claim:microphone-detection",
+    "sandbox": "fresh /?demo=1 session with a deterministic analyser fixture; feed steady background frames and four separated impulses, then assert exactly one four-attack take"
+  },
+  {
+    "id": "reference-pulse",
+    "claim": "An optional local reference pulse follows the selected tempo and can be muted or stopped",
+    "where": "practice instrument and README",
+    "test": "npm test -- --grep @claim:reference-pulse",
+    "sandbox": "fresh /practice page at 120 BPM; start the pulse, measure two 500 ms intervals, mute it, stop it, and assert no more beats"
   },
   {
     "id": "csv-export",
@@ -70,6 +84,13 @@
     "sandbox": "fresh browser context enters /demo; test follows the product checkout endpoint without payment and asserts the hosted checkout states $12.00 and one-time unlock"
   },
   {
+    "id": "payment-host",
+    "claim": "Dodo hosts checkout and handles payment through Sociobot",
+    "where": "license form, terms, and README",
+    "test": "npm test -- --grep @claim:payment-host",
+    "sandbox": "fresh browser context; assert there is no embedded checkout, the buy link uses Sociobot, and its redirect target is Dodo checkout"
+  },
+  {
     "id": "controlled-takes",
     "claim": "You can mark a take as controlled",
     "where": "landing steps and practice take controls",
@@ -82,6 +103,13 @@
     "where": "README and demo banner",
     "test": "npm test -- --grep @claim:demo-isolation",
     "sandbox": "fresh browser context; create real data, change demo data, then assert each mode retains only its own data"
+  },
+  {
+    "id": "storage-fallback",
+    "claim": "Practice data falls back to localStorage when IndexedDB is unavailable",
+    "where": "README data and limits",
+    "test": "npm test -- --grep @claim:storage-fallback",
+    "sandbox": "fresh browser context with IndexedDB disabled; save a passage, reload, and confirm recovery from steady-take:fallback"
   },
   {
     "id": "audio-not-recorded",

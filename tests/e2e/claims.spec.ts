@@ -1,9 +1,14 @@
 import { expect, test } from '@playwright/test';
 
 test('@claim:sample-improvement sample has six sessions and a 52% drop', async ({ page }) => {
-  await page.goto('/demo');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Explore a steadier passage');
-  await expect(page.getByText('26 milliseconds timing spread, 52% lower than the first session.')).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/?demo=1');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Review sample timing improvement');
+  const result = page.locator('.demo-result');
+  await expect(result.getByRole('heading', { name: 'Latest spread: 26 ms' })).toBeVisible();
+  await expect(result.getByText('Down from 54 ms across six sessions. That is 52% lower.')).toBeVisible();
+  await expect(result.locator('svg')).toBeVisible();
+  expect((await result.boundingBox())!.y + (await result.boundingBox())!.height).toBeLessThanOrEqual(844);
   await page.getByText('Read the chart as text').click();
   await expect(page.locator('.trend-figure details li')).toHaveCount(6);
 });
@@ -71,6 +76,63 @@ test('@claim:input-options microphone and MIDI inputs enter capture', async ({ p
   await expect(page.getByText('Take 1 captured. Mark it controlled if it felt settled.')).toBeVisible();
 });
 
+test('@claim:microphone-detection steady background is ignored and separated impulses are detected', async ({ page }) => {
+  await page.addInitScript(() => {
+    const stream = { getTracks: () => [{ stop: () => undefined }] };
+    Object.defineProperty(navigator, 'mediaDevices', { configurable: true, value: { getUserMedia: async () => stream } });
+    class FixtureAnalyser {
+      fftSize = 512;
+      private frame = 0;
+      getByteTimeDomainData(samples: Uint8Array) {
+        const loud = [14, 28, 42, 56].includes(this.frame++);
+        samples.forEach((_, index) => { samples[index] = 128 + (index % 2 ? 1 : -1) * (loud ? 32 : 2); });
+      }
+    }
+    class FixtureAudioContext {
+      createMediaStreamSource() { return { connect: () => undefined }; }
+      createAnalyser() { return new FixtureAnalyser(); }
+      close() { return Promise.resolve(); }
+    }
+    Object.defineProperty(window, 'AudioContext', { configurable: true, value: FixtureAudioContext });
+  });
+  await page.goto('/?demo=1');
+  await page.getByRole('button', { name: 'Microphone' }).click();
+  await page.getByRole('button', { name: 'Start take' }).click();
+  await expect(page.getByText('Take 1 captured. Mark it controlled if it felt settled.')).toBeVisible({ timeout: 3_000 });
+  await expect(page.locator('.take-mark:not(.empty)')).toHaveCount(1);
+});
+
+test('@claim:reference-pulse pulse follows 120 BPM, mutes, and stops', async ({ page }) => {
+  await page.goto('/practice');
+  await page.getByLabel('Passage name').fill('Pulse check');
+  await page.getByLabel('Tempo').fill('120');
+  await page.getByRole('button', { name: 'Set this passage' }).click();
+  await page.getByRole('button', { name: 'Start reference pulse' }).click();
+  await expect(page.locator('#reference-status')).toContainText('120 BPM');
+  const startedAt = Date.now();
+  await page.waitForFunction(() => Number(document.querySelector('#reference-status')?.getAttribute('data-pulse-count')) >= 3, undefined, { polling: 50 });
+  expect(Date.now() - startedAt).toBeGreaterThanOrEqual(850);
+  expect(Date.now() - startedAt).toBeLessThan(1_350);
+  await page.getByRole('button', { name: 'Mute pulse sound' }).click();
+  await expect(page.locator('#reference-status')).toContainText('sound off');
+  await page.getByRole('button', { name: 'Stop reference pulse' }).click();
+  const stoppedCount = await page.locator('#reference-status').getAttribute('data-pulse-count');
+  await page.waitForTimeout(650);
+  expect(await page.locator('#reference-status').getAttribute('data-pulse-count')).toBe(stoppedCount);
+});
+
+test('@claim:payment-host checkout is linked through Sociobot and hosted by Dodo', async ({ page }) => {
+  await page.goto('/');
+  expect(await page.locator('iframe').count()).toBe(0);
+  const buy = page.getByRole('link', { name: 'Buy the full version' });
+  await expect(buy).toHaveAttribute('href', 'https://api.sociobot.in/api/v1/products/music-practice-stability/checkout');
+  await page.getByRole('button', { name: 'Activate full version' }).click();
+  await expect(page.getByText('Dodo hosts checkout and handles payment through Sociobot.')).toBeVisible();
+  const response = await fetch(await buy.getAttribute('href') as string, { redirect: 'manual' });
+  expect(response.status).toBe(303);
+  expect(response.headers.get('location')).toMatch(/^https:\/\/checkout\.dodopayments\.com\/session\//);
+});
+
 test('@claim:csv-export CSV contains the practice fields', async ({ page }) => {
   await page.goto('/practice');
   const downloadPromise = page.waitForEvent('download');
@@ -115,7 +177,7 @@ test('@claim:paid-passages valid license has no product passage cap', async ({ p
   await page.goto('/demo');
   await page.getByRole('link', { name: 'Start for real' }).click();
   await page.getByRole('link', { name: 'Steady Take home' }).click();
-  await page.getByRole('button', { name: 'Have a license?' }).click();
+  await page.getByRole('button', { name: 'Activate full version' }).click();
   await page.getByLabel('License token').fill('valid-test');
   await page.getByRole('button', { name: 'Verify license' }).click();
   await expect(page.getByText('Full version active on this device.')).toBeVisible();
@@ -146,13 +208,31 @@ test('@claim:demo-isolation sample changes do not read or write real practice da
   await page.goto('/practice');
   await page.getByLabel('Passage name').fill('Real practice scale');
   await page.getByRole('button', { name: 'Set this passage' }).click();
-  await page.goto('/demo');
+  await page.goto('/?demo=1');
+  await expect(page).toHaveURL(/\?demo=1$/);
+  await expect(page.getByText('Demo — sample data, nothing is saved')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'G major crossing', level: 2 })).toBeVisible();
   await expect(page.getByText('Real practice scale')).toHaveCount(0);
   await page.getByRole('button', { name: 'Add a sample session' }).click();
   await page.goto('/practice');
   await expect(page.getByRole('heading', { name: 'Real practice scale', level: 2 })).toBeVisible();
   await expect(page.getByText('Sample session added with 22 ms timing spread.')).toHaveCount(0);
+});
+
+test('@claim:storage-fallback data survives reload in localStorage when IndexedDB fails', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, 'indexedDB', {
+      configurable: true,
+      get: () => { throw new DOMException('IndexedDB disabled by fixture', 'NotSupportedError'); },
+    });
+  });
+  await page.goto('/practice');
+  await page.getByLabel('Passage name').fill('Fallback scale');
+  await page.getByRole('button', { name: 'Set this passage' }).click();
+  await expect(page.getByRole('heading', { name: 'Fallback scale', level: 2 })).toBeVisible();
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('steady-take:fallback') ?? '{}').passages?.[0]?.name)).toBe('Fallback scale');
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Fallback scale', level: 2 })).toBeVisible();
 });
 
 test('@claim:audio-not-recorded microphone capture creates no recording or audio request', async ({ page, context }) => {
@@ -197,7 +277,7 @@ test('@claim:license-on-demand verify traffic starts only after a user enters a 
   await page.goto('/privacy');
   expect(external).toEqual([]);
   await page.getByRole('link', { name: 'Steady Take home' }).click();
-  await page.getByRole('button', { name: 'Have a license?' }).click();
+  await page.getByRole('button', { name: 'Activate full version' }).click();
   await page.getByLabel('License token').fill('on-demand');
   await page.getByRole('button', { name: 'Verify license' }).click();
   await expect(page.getByText('Full version active on this device.')).toBeVisible();
@@ -208,7 +288,7 @@ test('@claim:revoked-license a cached full license is locked after a revoked ver
   let revoked = false;
   await page.route('https://api.sociobot.in/api/v1/products/music-practice-stability/verify?license=revocable', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(revoked ? { valid: false, reason: 'revoked' } : { valid: true, reason: 'ok' }) }));
   await page.goto('/');
-  await page.getByRole('button', { name: 'Have a license?' }).click();
+  await page.getByRole('button', { name: 'Activate full version' }).click();
   await page.getByLabel('License token').fill('revocable');
   await page.getByRole('button', { name: 'Verify license' }).click();
   await page.getByRole('link', { name: 'Practice' }).click();

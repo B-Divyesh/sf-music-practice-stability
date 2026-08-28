@@ -14,6 +14,6 @@
   ],
   "shortcuts": [
     { "name": "Start a practice session", "url": "/practice", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Open the sample", "url": "/demo", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+    { "name": "Open the sample", "url": "/?demo=1", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
   ]
 }
