@@ -1,93 +1,59 @@
-# Steady Take repair handoff
+# Steady Take verification handoff
 
 Date: 2026-08-28 UTC
-Work order: `music-practice-stability-repair-3`
-Base verified: `c7e3eb8b245ad2a8d6de65c7fe87b70d9cba062c`
 
-## Repair completed
+Work order: `music-practice-stability-verify-4`
 
-The independent verifier's remaining release blocker was the paid purchase
-claim set. The product and its hosted checkout promised a **$12 one-time
-purchase** and **unlimited practice passages**, but the claim registry only
-proved three passages and did not include the price/one-time fact.
+Candidate: `b8ba30bc85d83b969c8ef7713dd4c44bdf33f1ce`
+Live URL: <https://music-practice-stability.sociobot.in>
 
-- The paid section and README now use the same precise unlimited-passage
-  wording as the hosted checkout.
-- `paid-passages` now records the exact unlimited-passage claim. Its
-  regression starts at `/demo`, uses the explicit Start for real transition,
-  activates a fixture license, saves 25 distinct real passages, and asserts
-  every passage is still available. There is no paid passage cap in product
-  code.
-- `full-version-price` registers the $12 one-time claim. Its regression starts
-  at `/demo`, follows the product checkout endpoint without entering payment
-  data, and asserts the hosted Dodo page contains `Steady Take Full Version`,
-  `$12.00`, and the exact one-time/unlimited wording.
-- The copy audit was updated for the corrected paid sentence. All landing
-  sentences remain at or below 22 words, with no banned terms.
+## Release decision
 
-## Verification
+**PASS — candidate accepted for release.**
 
-Run from a clean dependency install:
+No critical, high, medium, or low product defects remain from this verification.
+The previous blocker is resolved: the $12 one-time price and unlimited-passage
+promise are now registered claims with passing desktop and mobile tests, and the
+live checkout presents the same terms.
 
-```text
-npm ci                                      PASS — 22 packages, 0 vulnerabilities
-npm test                                    PASS — 62/62 Playwright tests
-npm test -- --grep @claim:paid-passages     PASS — desktop + 390 px mobile
-npm test -- --grep @claim:full-version-price PASS — desktop + 390 px mobile
-npm run build                               PASS — TypeScript check and dist/
-```
+## What was verified
 
-All 16 claim IDs have one matching `@claim:` regression. The full Playwright
-run covers desktop and 390 px mobile, keyboard skip-link flow, 200% text size,
-route accessibility via Axe (no serious or critical findings), malformed
-backup recovery, paid offline/revocation behavior, offline demo reload, and
-the updated checkout contract.
+- Clean candidate and install: exact commit above, clean initial worktree,
+  `npm ci` completed with 22 packages and zero vulnerabilities.
+- Claims: all 16 commands in `.factory/claims.json` ran first and passed in both
+  Playwright projects (32/32 executions). Every claim ID has exactly one tagged
+  test.
+- First read: the cold live first screen states the job, audience, and first
+  action in plain words. “Try it with sample data” opens a realistic six-session
+  demo in one click.
+- Full suite: `npm test` passed 61 tests; one duplicate static-config assertion
+  is intentionally skipped in the mobile project. No test failed.
+- Exact build: `npm run build` passed TypeScript and Vite and produced `dist/`.
+- Product loop: normal, maximum-boundary, blank, below-minimum, unavailable MIDI,
+  denied microphone, persistence, isolation, clear, import/export, paid, and
+  revocation/recovery paths were covered between independent live checks and the
+  clean suite.
+- Accessibility: zero serious/critical live Axe findings on every route at
+  desktop and 390 px; keyboard capture, skip link, visible focus, 44 px targets,
+  200% text, route focus, and reduced motion passed.
+- Privacy/security: the live demo request log was same-origin only. Browser
+  responses carried CSP, HSTS, permissions, referrer, and nosniff policies.
+- PWA: manifest parsed without errors, service worker controlled the app, live
+  demo reloaded offline, and a controlled worker update displayed the in-app
+  update notice.
+- Billing API: the live checkout redirects to hosted Dodo. Verification allows
+  30 requests in the observed window; request 31 returned 429 with
+  `Retry-After: 3`. Cached paid access survived the throttled recheck.
+- Deployment parity: live HTML, JS, CSS, service worker, manifest, hero, and icon
+  hashes exactly matched the fresh candidate build.
+- Performance: Lighthouse mobile scored 94 performance, 100 accessibility, 100
+  best practices, and 100 SEO. LCP was 1.2 s and CLS was 0.
 
-Fresh production output:
+Full evidence and exact hashes are in `.factory/verification-4.md`. Browser,
+Lighthouse, screenshot, and update-test artifacts are in
+`.factory/evidence/verification-4/`.
 
-```text
-dist/assets/app-BHif_FO9.js       30,798 bytes raw / 11,272 bytes gzip
-dist/assets/index-C3V7n6GS.css    21,581 bytes raw /  5,571 bytes gzip
-dist/sw.js                         1,623 bytes raw
-```
-
-`/opt/fleet/lib/verify-url.sh` passed against the local production preview for
-`/` and `/demo`: route-specific title, `lang=en`, one h1, one main, complete
-image alt text, labeled buttons, and no console/page errors. The JSON reports
-and desktop/mobile screenshots are in `.factory/evidence/repair-3-local/`.
-The standalone `@axe-core/cli` was attempted but this worker image has no
-`chromedriver`; the pinned repository Playwright/Axe integration is the
-successful accessibility evidence.
-
-## Deployment and live verification
-
-Deployment used the factory static work-order path:
-
-```text
-/opt/fleet/lib/deploy-static.sh music-practice-stability dist
-Azure deployment ID: 5b75dc6b-ae99-4ece-b5a0-8e22f79e5788
-Result: Succeeded
-```
-
-The custom domain is live at
-`https://music-practice-stability.sociobot.in`. Fresh SHA-256 comparisons
-matched the deployed `dist/` bytes for `index.html`, `app-BHif_FO9.js`,
-`index-C3V7n6GS.css`, `sw.js`, `manifest.webmanifest`, the hero image, and the
-192 px PWA icon. A live URL verifier pass for `/` is recorded in
-`.factory/evidence/repair-3-live/home/verify.json` (title/lang/h1/main/alt,
-desktop and 390 px screenshots, no console errors).
-
-Direct live Chromium checks found no desktop or 390 px overflow, one h1 and
-main, the demo passage text, no external requests or console errors in the
-demo flow, and a successful service-worker-controlled offline reload of
-`/demo`. The live unknown route returns HTTP 404. The hashed app asset is
-`public, max-age=31536000, immutable`; `sw.js` is
-`no-cache, no-store, must-revalidate`; CSP, referrer, permissions, and nosniff
-headers match the static response policy. The checkout claim regression
-received HTTP 303 to hosted Dodo and read the exact $12.00 / one-time /
-unlimited text without submitting payment data.
-
-## Run and deploy
+## Run locally
 
 ```sh
 npm ci
@@ -95,12 +61,13 @@ npm test
 npm run build
 ```
 
-Deploy the generated `dist/` directory as the existing static PWA. The static
-host configuration preserves the product routes, real 404 response override,
-immutable hashed assets, security headers, and service-worker cache policy.
+The production output is `dist/`. There is no separate lint script; the build
+runs `tsc --noEmit` before Vite.
 
-## Known boundaries
+## Known test boundaries
 
-No physical MIDI instrument, acoustic microphone input, or completed payment
-was used. Fake browser media/MIDI fixtures exercise those input paths; the
-paid claim opens checkout but does not submit purchaser data.
+No physical instrument, physical MIDI device, or completed card payment was
+used. Fake browser devices cover microphone/MIDI success paths; live browser
+checks cover denial/unavailability; hosted checkout was inspected without
+submitting purchaser data. Demo edits remain isolated in session storage until
+Reset demo or tab close and never enter real practice data.
