@@ -1,61 +1,45 @@
-# Steady Take repair handoff — PASS
+# Steady Take verification handoff — FAIL
 
 Date: 2026-08-28 UTC
+Work order: `music-practice-stability-verify-3`
+Candidate: `c7e3eb8b245ad2a8d6de65c7fe87b70d9cba062c`
+Live URL: <https://music-practice-stability.sociobot.in>
 
-Work order: `music-practice-stability-repair-2`
-Base verified: `eb5329688acc8d4373fc64debf1c7945fa1c890e`
+## Release decision
 
-## Repairs
+**FAIL — do not release.** The candidate and live deployment otherwise pass
+the clean install, all 15 registered claim commands, 62-test suite, production
+build, live PWA/offline, privacy, security-header, accessibility, keyboard,
+mobile, and deployment-parity checks. Full evidence is in
+`.factory/verification-3.md`.
 
-- Kept cached valid licenses active when daily verification is unavailable;
-  explicit invalid/revoked responses still remove full-version access.
-- Added full structural validation for imported and previously persisted data:
-  passages, sessions, takes, values, input modes, IDs, and relationships.
-  Invalid imports leave the last good data untouched. Legacy corrupt records are
-  discarded so `/practice` stays recoverable.
-- Rebuilt the deployed static `404.html` with the product header, navigation,
-  skip link, main, footer, designed focus treatment, 44 px links, and responsive
-  200% text layout.
-- Replaced the unprovable “unlimited” wording with “more than one passage” and
-  registered/proved take correction, on-demand license traffic, and revoked
-  license behavior. The paid test now creates three passages.
+## Blocking defect
 
-## Verification
+The public **$12 one-time purchase** claim on the landing page/README is not in
+`.factory/claims.json` and has no tagged sandbox test. The product-linked Dodo
+checkout also promises **“Saves unlimited practice passages on this device,”**
+while the registered `paid-passages` claim proves only three passages and says
+“more than one.” These are visitor-reliant paid facts without the recurring
+proof required by the claims contract.
+
+Observed checkout and live landing price agree today; that one-time observation
+does not replace a registered claim test.
+
+## Required next step
+
+Register and prove the exact public purchase facts from the demo sandbox, or
+narrow/remove the public wording to match a registered, testable claim. Then
+rerun every claims command, `npm test`, `npm run build`, and independent live
+verification.
+
+## Verification summary
 
 ```text
-npm ci                           PASS — 22 packages, 0 vulnerabilities
-npm audit --audit-level=high     PASS — 0 vulnerabilities
-npx tsc --noEmit                 PASS
-npm test                         PASS — 62/62 (Chromium desktop + 390 px mobile)
-npm run build                    PASS — dist/ produced
+npm ci        PASS — 22 packages; 0 vulnerabilities
+npm test      PASS — 62/62
+npm run build PASS — typecheck and dist/
 ```
 
-The suite covers all 15 registered claims in both projects, offline reload,
-offline stale-paid-license access, malformed import and legacy-corrupt storage
-recovery, valid-to-revoked licensing, keyboard skip navigation, Axe serious and
-critical checks on `/`, `/practice`, `/demo`, `/privacy`, `/terms`, static 404
-focus/target/200%-text checks, response config, and checkout reachability.
-
-Fresh production build sizes: JavaScript 30.78 kB (11.27 kB gzip), CSS 21.58
-kB (5.57 kB gzip), service worker 1.62 kB. The bundle remains well below the
-static PWA budget. `staticwebapp.config.json` keeps hashed assets immutable,
-the service worker no-store, and an actual 404 rewrite.
-
-Live pre-push integration check: the Sociobot checkout endpoint returned HTTP
-303 to a hosted Dodo checkout. No deployment command exists in this repository;
-the configured static deployment is the `main` branch push of `dist/`.
-
-## Known limits
-
-Physical acoustic input, physical MIDI hardware, and a completed paid card
-transaction are not available in this worker. Fake microphone/MIDI fixtures,
-permission failure recovery, fixture-backed valid/revoked license flows, and
-hosted checkout reachability were verified.
-
-## Run
-
-```sh
-npm ci
-npm test
-npm run build
-```
+Live content hashes for `/`, `app-KLmQtiuR.js`, and `sw.js` exactly equal the
+fresh candidate build. The invalid-license API allowed 30 requests, then
+returned HTTP 429 with `Retry-After: 4` on request 31.
