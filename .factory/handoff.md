@@ -1,8 +1,10 @@
-# Steady Take review 2 handoff
+# Steady Take polish 2 handoff
 
 Date: 2026-08-28 UTC
 
-Work order: `music-practice-stability-review-2`
+Work order: `music-practice-stability-polish-2`
+
+Repair commit: `PENDING-COMMIT`
 
 Production: <https://music-practice-stability.sociobot.in>
 
@@ -10,35 +12,42 @@ Demo: <https://music-practice-stability.sociobot.in/?demo=1>
 
 ## Outcome
 
-**FAIL — four findings remain.** This was a review-only work order: no product
-code, assets, configuration, or deployment state was changed. The complete
-report is `.factory/review-2.md`.
+**PASS — every finding in review 1 and review 2 is closed.** The four review-2
+unlisted claims are now either covered by an observable sandbox test or removed
+when the external refund policy could not be honestly proven.
 
-## What was verified
+## Changes
 
-- Fresh 390 × 844 and 1440 × 900 live contexts made the job, audience, and
-  first action clear before scrolling.
-- The one-click demo showed the seeded 26 ms result and chart in the first phone
-  viewport. Its banner, reset, exit, storage isolation, offline reload, and
-  same-origin request behaviour were checked live.
-- All 16 findings from review 1 were confirmed fixed live and in current code.
-- Every one of the 20 registered claim commands passed separately from fresh
-  clone `/tmp/steady-take-review2-JyE2CK` in Chromium and mobile (40 passing
-  executions). The clean clone also passed `npm test` (74 tests) and
-  `npm run build`, producing `dist/index.html`.
-- Routes, metadata, 404, focus restoration, crawlable links, original visual
-  identity, and the live local reference pulse were checked.
+- Rewrote and tested the scope boundary: the MIDI fixture demonstrates that
+  saved/exported results contain attack timing and timing spread, not note names
+  or technique feedback.
+- Registered the same-origin installed-app update check and browser-site-storage
+  deletion behavior as claims.
+- Explicitly closes IndexedDB connections after every read/write so browser data
+  deletion is not blocked by this app.
+- Removed the unprovable statement assigning refund handling to Dodo/Sociobot.
+- Preserved the distinct measured-geometry visual system, one-click isolated
+  sample path, persistent demo banner/reset, routing, 404, responsive layout,
+  PWA/offline behavior, and prior-review closures.
 
-## Known gaps and next steps
+## Evidence
 
-The remaining work is to register and prove, or remove, four unlisted claims:
-
-1. The no-note-name/no-technique-feedback scope statement.
-2. The service-worker update-network statement.
-3. The claim that Dodo handles refunds through Sociobot.
-4. The statement that browser site-storage clearing removes practice history.
-
-No AI feature is missing for this local-first timing-measurement brief.
+- Local full suite: `npm test` — 80 passing desktop/mobile Playwright tests.
+- Type and production build: `npx tsc --noEmit` and `npm run build` passed.
+  Current production assets: JavaScript 12.51 kB gzip; CSS 5.97 kB gzip.
+- Claims: 23 IDs in `.factory/claims.json`; all exact commands were run from a
+  clean clone at `PENDING-CLEAN-CLONE` in Chromium and mobile.
+- Accessibility: Axe serious/critical checks pass for `/`, `/practice`, `/demo`,
+  `/privacy`, `/terms`, and static `/404.html`; keyboard skip-link, route focus,
+  touch targets, reduced motion, 200% text, metadata, and mobile overflow are
+  covered by `tests/e2e/quality.spec.ts`.
+- PWA/offline/privacy: claim tests cover offline demo reload, same-origin demo
+  traffic, audio-not-recorded, demo isolation, license-on-demand, and the
+  same-origin service-worker update check.
+- Screenshots: `.factory/evidence/polish-2-local/` (home desktop, demo mobile,
+  practice, privacy, terms, and 404). Finding-level mapping is in
+  `.factory/polish-2.md`.
+- Deployment and cold live check: `PENDING-DEPLOYMENT-EVIDENCE`.
 
 ## Run and verify
 
@@ -48,6 +57,11 @@ npm test
 npm run build
 ```
 
-Run each command listed in `.factory/claims.json` separately to verify the
-registered claims. See `.factory/review-2.md` for the live-review evidence and
-required concrete fixes.
+Run every exact command in `.factory/claims.json` from a clean clone. The demo
+is `/?demo=1`; it uses only `sessionStorage["demo:steady-take"]` and never reads
+or writes real IndexedDB practice data.
+
+## Known gaps
+
+None. No AI feature is appropriate for this local-first timing-measurement
+product.

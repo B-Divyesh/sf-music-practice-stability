@@ -14,6 +14,13 @@
     "sandbox": "fresh browser context at /demo; wait for service worker, set offline, reload, and assert the seeded passage"
   },
   {
+    "id": "update-check",
+    "claim": "The installed app checks this site for updates",
+    "where": "privacy page",
+    "test": "npm test -- --grep @claim:update-check",
+    "sandbox": "fresh browser context at /privacy; trigger service-worker registration.update and assert its update request is same-origin"
+  },
+  {
     "id": "local-only",
     "claim": "Audio and practice history stay on this device",
     "where": "landing facts, limits, privacy page, and README",
@@ -42,6 +49,13 @@
     "sandbox": "fresh /?demo=1 session with a deterministic analyser fixture; feed steady background frames and four separated impulses, then assert exactly one four-attack take"
   },
   {
+    "id": "scope-limits",
+    "claim": "Steady Take reports attack timing and timing spread; it does not show MIDI note names or technique feedback",
+    "where": "landing limits, terms, and README",
+    "test": "npm test -- --grep @claim:scope-limits",
+    "sandbox": "fresh /?demo=1 session with fixture MIDI notes; save six takes, export CSV, and assert only timing fields are shown or exported"
+  },
+  {
     "id": "reference-pulse",
     "claim": "An optional local reference pulse follows the selected tempo and can be muted or stopped",
     "where": "practice instrument and README",
@@ -61,6 +75,13 @@
     "where": "practice data controls, privacy page, and README",
     "test": "npm test -- --grep @claim:data-backup",
     "sandbox": "fresh /practice page; create a passage, export and import its JSON, then confirm clear and assert the empty state"
+  },
+  {
+    "id": "site-storage-clear",
+    "claim": "Clearing site storage removes practice history",
+    "where": "privacy page",
+    "test": "npm test -- --grep @claim:site-storage-clear",
+    "sandbox": "fresh /practice page; create real data, clear the origin's IndexedDB and localStorage, reload, and assert the empty state"
   },
   {
     "id": "free-passage-limit",
@@ -134,7 +155,7 @@
   },
   {
     "id": "revoked-license",
-    "claim": "A refunded or revoked license stops full-version access",
+    "claim": "A revoked license stops full-version access",
     "where": "terms page",
     "test": "npm test -- --grep @claim:revoked-license",
     "sandbox": "fresh browser context; activate a valid fixture license, expire its cached verdict, return a revoked fixture, and assert full access is removed"

@@ -23,7 +23,8 @@ terms count as one word. No sentence exceeds 22 words. No banned word appears.
 | Mark controlled takes and watch the same passage over time. | 10 |
 | Microphone mode looks for separate attacks above the recent sound level. | 11 |
 | Use tap input if it adds unwanted marks. | 8 |
-| Steady Take does not identify notes, assess technique, or replace a teacher. | 12 |
+| Steady Take reports attack timing and timing spread. | 8 |
+| It does not show MIDI note names or technique feedback. | 10 |
 | You can correct any take before saving. | 7 |
 | No recording is kept. | 4 |
 | Only attack times and your passage history are stored on this device. | 12 |

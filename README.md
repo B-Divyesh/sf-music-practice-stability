@@ -52,8 +52,8 @@ only when IndexedDB is unavailable. Export CSV for analysis or JSON for a full
 backup. The demo uses the separate `demo:steady-take` sessionStorage key.
 
 Microphone mode looks for separate attacks above the recent sound level. Use
-tap input if it adds unwanted marks. Steady Take measures timing only; it does
-not identify notes or assess technique.
+tap input if it adds unwanted marks. Steady Take reports attack timing and
+timing spread. It does not show MIDI note names or technique feedback.
 
 ## Full version
 

@@ -26,6 +26,18 @@ test('@claim:offline-reload demo reloads with its data offline', async ({ page, 
   await expect(page.getByText('26 milliseconds timing spread, 52% lower than the first session.')).toBeVisible();
 });
 
+test('@claim:update-check installed app checks only its own site for an update', async ({ page }) => {
+  await page.goto('/privacy');
+  const registration = await page.evaluate(async () => {
+    const worker = await navigator.serviceWorker.ready;
+    await worker.update();
+    return { scope: worker.scope, scriptUrl: worker.active?.scriptURL ?? worker.waiting?.scriptURL ?? worker.installing?.scriptURL ?? '' };
+  });
+  expect(new URL(registration.scope).origin).toBe('http://127.0.0.1:4173');
+  expect(new URL(registration.scriptUrl).origin).toBe('http://127.0.0.1:4173');
+  expect(new URL(registration.scriptUrl).pathname).toBe('/sw.js');
+});
+
 test('@claim:local-only sample flow makes only same-origin requests', async ({ page }) => {
   const external: string[] = [];
   page.on('request', (request) => {
@@ -102,6 +114,42 @@ test('@claim:microphone-detection steady background is ignored and separated imp
   await expect(page.locator('.take-mark:not(.empty)')).toHaveCount(1);
 });
 
+test('@claim:scope-limits MIDI fixture saves timing output without note names or technique feedback', async ({ page }) => {
+  await page.addInitScript(() => {
+    const input: { onmidimessage: ((event: { data: Uint8Array }) => void) | null } = { onmidimessage: null };
+    Object.defineProperty(window, '__steadyMidiScopeInput', { value: input });
+    Object.defineProperty(navigator, 'requestMIDIAccess', { value: async () => ({ inputs: new Map([['scope-fixture', input]]) }) });
+  });
+  await page.goto('/practice');
+  await page.getByLabel('Passage name').fill('MIDI scope fixture');
+  await page.getByRole('button', { name: 'Set this passage' }).click();
+  await page.getByRole('button', { name: 'Midi', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Midi', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  for (let take = 0; take < 6; take += 1) {
+    await page.getByRole('button', { name: 'Start take' }).click();
+    for (const pitch of [101, 103, 107, 109]) {
+      await page.evaluate((note) => {
+        const input = (window as unknown as { __steadyMidiScopeInput: { onmidimessage: ((event: { data: Uint8Array }) => void) | null } }).__steadyMidiScopeInput;
+        input.onmidimessage?.({ data: new Uint8Array([0x90, note, 100]) });
+      }, pitch);
+      await page.waitForTimeout(8);
+    }
+  }
+  await page.getByRole('button', { name: 'Save this session' }).click();
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Export CSV' }).click();
+  const download = await downloadPromise;
+  const stream = await download.createReadStream();
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) chunks.push(Buffer.from(chunk));
+  const exported = Buffer.concat(chunks).toString();
+  expect(exported.split('\n')[0]).toBe('"session_id","passage","date","bpm","input","take","controlled","deviation_ms","onsets_ms"');
+  expect(exported).toContain('"midi"');
+  expect(exported).not.toMatch(/note|pitch|technique/i);
+  await expect(page.getByText('MIDI note names')).toHaveCount(0);
+  await expect(page.getByText('technique feedback')).toHaveCount(0);
+});
+
 test('@claim:reference-pulse pulse follows 120 BPM, mutes, and stops', async ({ page }) => {
   await page.goto('/practice');
   await page.getByLabel('Passage name').fill('Pulse check');
@@ -161,6 +209,27 @@ test('@claim:data-backup JSON backup round-trips and local data clears', async (
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: 'Clear all data' }).click();
   await expect(page.getByRole('heading', { name: 'Set your first passage' })).toBeVisible();
+});
+
+test('@claim:site-storage-clear clearing browser site storage removes practice history', async ({ page }) => {
+  await page.goto('/practice');
+  await page.getByLabel('Passage name').fill('Disposable history');
+  await page.getByRole('button', { name: 'Set this passage' }).click();
+  await expect(page.getByRole('heading', { name: 'Disposable history', level: 2 })).toBeVisible();
+  await page.goto('/privacy');
+  await page.evaluate(async () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    await new Promise<void>((resolve, reject) => {
+      const request = indexedDB.deleteDatabase('steady-take');
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+      request.onblocked = () => reject(new Error('The practice database remained open while clearing site storage.'));
+    });
+  });
+  await page.goto('/practice');
+  await expect(page.getByRole('heading', { name: 'Set your first passage' })).toBeVisible();
+  await expect(page.getByText('Disposable history')).toHaveCount(0);
 });
 
 test('@claim:free-passage-limit free mode keeps one passage', async ({ page }) => {

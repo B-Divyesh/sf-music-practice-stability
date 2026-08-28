@@ -116,19 +116,23 @@ export async function loadData(demo: boolean): Promise<AppData> {
   }
   try {
     const db = await openDb();
-    return await new Promise((resolve, reject) => {
-      const request = db.transaction(STORE_NAME).objectStore(STORE_NAME).get(DATA_KEY);
-      request.onsuccess = () => {
-        const parsed = parseAppData(request.result);
-        if (!request.result || parsed) resolve(parsed ?? emptyData());
-        else {
-          // Old invalid records must not keep the practice page unrecoverable.
-          db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete(DATA_KEY);
-          resolve(emptyData());
-        }
-      };
-      request.onerror = () => reject(request.error);
-    });
+    try {
+      return await new Promise((resolve, reject) => {
+        const request = db.transaction(STORE_NAME).objectStore(STORE_NAME).get(DATA_KEY);
+        request.onsuccess = () => {
+          const parsed = parseAppData(request.result);
+          if (!request.result || parsed) resolve(parsed ?? emptyData());
+          else {
+            // Old invalid records must not keep the practice page unrecoverable.
+            db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete(DATA_KEY);
+            resolve(emptyData());
+          }
+        };
+        request.onerror = () => reject(request.error);
+      });
+    } finally {
+      db.close();
+    }
   } catch {
     const fallback = localStorage.getItem('steady-take:fallback');
     if (!fallback) return emptyData();
@@ -148,11 +152,15 @@ export async function saveData(data: AppData, demo: boolean): Promise<void> {
   }
   try {
     const db = await openDb();
-    await new Promise<void>((resolve, reject) => {
-      const request = db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).put(data, DATA_KEY);
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
-    });
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const request = db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).put(data, DATA_KEY);
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    } finally {
+      db.close();
+    }
   } catch {
     localStorage.setItem('steady-take:fallback', JSON.stringify(data));
   }
