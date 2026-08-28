@@ -1,0 +1,8 @@
+{
+  "tool": "/opt/fleet/lib/gen-image.sh",
+  "deployment": "factory-image",
+  "date": "2026-08-28",
+  "size": "1536x1024",
+  "quality": "high",
+  "prompt": "Use case: stylized-concept. Asset type: wide landing-page hero illustration. Primary request: an editorial still life about musical timing becoming steady. Scene: layered warm cream graph-paper sheets with seven horizontal timing lanes; early lanes have uneven burnt coral circular onset marks and later lanes align into a calm pale mint grid; a small abstract mechanical metronome made from deep green-black geometric planes anchors the right edge. Style: tactile cut-paper generative geometry with crisp vector-like edges, subtle paper grain, restrained screen-print texture. Composition: wide 3:2, diagonal rhythm, generous calm negative space, no interface screenshot. Lighting: soft side light, short shadows. Palette: warm ivory, deep ink navy, burnt coral, pale mint, one muted gold accent. No text, no letters, no notation, no logos, no watermark, no people, no photorealistic devices, no gradients."
+}

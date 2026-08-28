@@ -1,0 +1,11 @@
+{
+  "slug": "music-practice-stability",
+  "title": "Steady Take",
+  "territory": "games-creative",
+  "user": "Beginning instrumentalists practicing short technical passages who need feedback on repeatability and control, not only whether they hit notes or played fast.",
+  "smallest_useful_product": "Offline PWA microphone/MIDI practice timer that records onset timing across repeated short patterns, visualizes variance, and lets a learner mark a take as controlled.",
+  "artifact_class": "pwa-offline",
+  "monetization": "one-time",
+  "constraints": "Audio remains on device; disclose microphone limitations; use Web MIDI opportunistically and preserve a no-MIDI mode.",
+  "summary": "Measure timing stability across repeated practice takes"
+}
