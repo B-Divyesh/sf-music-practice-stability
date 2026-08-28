@@ -1,0 +1,65 @@
+[
+  {
+    "id": "sample-improvement",
+    "claim": "The sample shows six sessions and a 52% drop in timing spread",
+    "where": "landing first screen and demo trend",
+    "test": "npm test -- --grep @claim:sample-improvement",
+    "sandbox": "fresh browser context at /demo; assert six seeded rows, latest 26 ms, and 52% lower summary"
+  },
+  {
+    "id": "offline-reload",
+    "claim": "Works offline after the first visit",
+    "where": "landing facts and README",
+    "test": "npm test -- --grep @claim:offline-reload",
+    "sandbox": "fresh browser context at /demo; wait for service worker, set offline, reload, and assert the seeded passage"
+  },
+  {
+    "id": "local-only",
+    "claim": "Audio and practice history stay on this device",
+    "where": "landing facts, limits, privacy page, and README",
+    "test": "npm test -- --grep @claim:local-only",
+    "sandbox": "fresh browser context at /demo; monitor the entire sample interaction and assert every request is same-origin"
+  },
+  {
+    "id": "tap-capture",
+    "claim": "Records six repeated takes and measures timing spread",
+    "where": "product interface and README",
+    "test": "npm test -- --grep @claim:tap-capture",
+    "sandbox": "fresh /demo session; record four taps in each of six takes, save, and assert a measured spread appears"
+  },
+  {
+    "id": "input-options",
+    "claim": "Accepts microphone, Web MIDI, and tap input",
+    "where": "landing steps, practice input selector, and README",
+    "test": "npm test -- --grep @claim:input-options",
+    "sandbox": "fresh /demo session with a fake microphone and MIDI input; start microphone capture and record a full MIDI take"
+  },
+  {
+    "id": "csv-export",
+    "claim": "Exports practice history as CSV",
+    "where": "practice data controls and README",
+    "test": "npm test -- --grep @claim:csv-export",
+    "sandbox": "fresh /practice page; export and assert the CSV header"
+  },
+  {
+    "id": "data-backup",
+    "claim": "Exports and imports a JSON backup and clears local history",
+    "where": "practice data controls, privacy page, and README",
+    "test": "npm test -- --grep @claim:data-backup",
+    "sandbox": "fresh /practice page; create a passage, export and import its JSON, then confirm clear and assert the empty state"
+  },
+  {
+    "id": "free-passage-limit",
+    "claim": "The free version saves one passage",
+    "where": "landing facts, paid section, and README",
+    "test": "npm test -- --grep @claim:free-passage-limit",
+    "sandbox": "fresh /practice page; save one passage and assert the second-passage action explains the full version"
+  },
+  {
+    "id": "paid-passages",
+    "claim": "A valid full-version license adds unlimited saved passages",
+    "where": "paid section and README",
+    "test": "npm test -- --grep @claim:paid-passages",
+    "sandbox": "fresh browser context with a fixture verify response; activate a license and save two passages"
+  }
+]

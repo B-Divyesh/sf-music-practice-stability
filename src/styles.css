@@ -93,3 +93,4 @@ table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}capt
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.button:hover{transform:none;box-shadow:4px 4px 0 var(--ink)}.hero-art{transform:none}}
 @media(max-width:620px){.passage-picker{align-items:flex-start;flex-direction:column}}
 .take-mark.empty{opacity:1;color:#bdc9c7}.take-mark.empty i{opacity:.55}
+@media(max-width:620px){.history-list caption{display:block;width:100%;padding:0 8px}.history-list table{display:block;width:100%}}

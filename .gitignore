@@ -2,4 +2,8 @@ node_modules/
 dist/
 test-results/
 playwright-report/
+graphify-out/
+.factory/evidence/**/*.png
+.factory/evidence/**/index.html
+.factory/evidence/lighthouse-home.json
 .DS_Store
