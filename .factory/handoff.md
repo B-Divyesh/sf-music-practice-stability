@@ -1,59 +1,43 @@
-# Steady Take verification handoff
+# Steady Take adversarial review handoff
 
 Date: 2026-08-28 UTC
 
-Work order: `music-practice-stability-verify-4`
+Work order: `music-practice-stability-review-1`
 
-Candidate: `b8ba30bc85d83b969c8ef7713dd4c44bdf33f1ce`
-Live URL: <https://music-practice-stability.sociobot.in>
+Candidate reviewed: `7cfbc65ecc1e613e0f49a0140ae16d7889896fb1`
 
-## Release decision
+## Outcome
 
-**PASS — candidate accepted for release.**
+**FAIL** — `.factory/review-1.md` records 16 findings: one blocking, four
+major, and eleven minor. Product code was not modified.
 
-No critical, high, medium, or low product defects remain from this verification.
-The previous blocker is resolved: the $12 one-time price and unlimited-passage
-promise are now registered claims with passing desktop and mobile tests, and the
-live checkout presents the same terms.
+The blocker is the one-click demo presentation: its promised 26 ms / 52%
+improvement result is 2,295 px down the 390 px page rather than visible in the
+first post-click viewport. Unlisted microphone, storage-fallback, and payment
+claims also prevent acceptance.
 
-## What was verified
+## Verification performed
 
-- Clean candidate and install: exact commit above, clean initial worktree,
-  `npm ci` completed with 22 packages and zero vulnerabilities.
-- Claims: all 16 commands in `.factory/claims.json` ran first and passed in both
-  Playwright projects (32/32 executions). Every claim ID has exactly one tagged
-  test.
-- First read: the cold live first screen states the job, audience, and first
-  action in plain words. “Try it with sample data” opens a realistic six-session
-  demo in one click.
-- Full suite: `npm test` passed 61 tests; one duplicate static-config assertion
-  is intentionally skipped in the mobile project. No test failed.
-- Exact build: `npm run build` passed TypeScript and Vite and produced `dist/`.
-- Product loop: normal, maximum-boundary, blank, below-minimum, unavailable MIDI,
-  denied microphone, persistence, isolation, clear, import/export, paid, and
-  revocation/recovery paths were covered between independent live checks and the
-  clean suite.
-- Accessibility: zero serious/critical live Axe findings on every route at
-  desktop and 390 px; keyboard capture, skip link, visible focus, 44 px targets,
-  200% text, route focus, and reduced motion passed.
-- Privacy/security: the live demo request log was same-origin only. Browser
-  responses carried CSP, HSTS, permissions, referrer, and nosniff policies.
-- PWA: manifest parsed without errors, service worker controlled the app, live
-  demo reloaded offline, and a controlled worker update displayed the in-app
-  update notice.
-- Billing API: the live checkout redirects to hosted Dodo. Verification allows
-  30 requests in the observed window; request 31 returned 429 with
-  `Retry-After: 3`. Cached paid access survived the throttled recheck.
-- Deployment parity: live HTML, JS, CSS, service worker, manifest, hero, and icon
-  hashes exactly matched the fresh candidate build.
-- Performance: Lighthouse mobile scored 94 performance, 100 accessibility, 100
-  best practices, and 100 SEO. LCP was 1.2 s and CLS was 0.
+- Opened the live home and demo cold at 390 × 844 and 1440 × 900.
+- Exercised demo add/reset, real/demo isolation, direct demo entry, and live
+  service-worker offline reload.
+- Recorded the live demo request stream and confirmed same-origin-only traffic.
+- Ran all 16 claim commands separately from a fresh `--no-local` clone: 32/32
+  desktop/mobile executions passed.
+- Ran the complete clean-clone suite: 61 passed, 1 intentional duplicate static
+  check skipped.
+- Ran `npm run build`: passed and produced `dist/`; app JS was 11.27 kB gzip.
+- Crawled live links and routes, checked status, titles, h1/main/lang,
+  canonicals, metadata, headers, keyboard route focus/back behavior, and the
+  designed 404.
+- Ran live Axe checks on all routes and the 404 at desktop and mobile sizes:
+  zero serious/critical findings.
+- Ran `/opt/fleet/lib/verify-url.sh` against the live home: passed with no
+  console errors.
+- Read the brief, design, claims, demo record, README, source, tests, and the
+  prior handoff. No earlier review or polish file exists.
 
-Full evidence and exact hashes are in `.factory/verification-4.md`. Browser,
-Lighthouse, screenshot, and update-test artifacts are in
-`.factory/evidence/verification-4/`.
-
-## Run locally
+## Reproduce
 
 ```sh
 npm ci
@@ -61,13 +45,12 @@ npm test
 npm run build
 ```
 
-The production output is `dist/`. There is no separate lint script; the build
-runs `tsc --noEmit` before Vite.
+Claim commands are listed in `.factory/claims.json`. The complete first-read,
+copy audit, finding details, claim results, history check, and required fixes
+are in `.factory/review-1.md`.
 
-## Known test boundaries
+## Next step
 
-No physical instrument, physical MIDI device, or completed card payment was
-used. Fake browser devices cover microphone/MIDI success paths; live browser
-checks cover denial/unavailability; hosted checkout was inspected without
-submitting purchaser data. Demo edits remain isolated in session storage until
-Reset demo or tab close and never enter real practice data.
+Address every finding, deploy the repaired candidate, and rerun the full review
+from scratch. Do not treat the passing existing suite as acceptance: it does
+not cover the demo first viewport or the unlisted claims identified here.
