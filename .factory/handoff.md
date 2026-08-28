@@ -48,7 +48,11 @@ when the external refund policy could not be honestly proven.
 - Screenshots: `.factory/evidence/polish-2-local/` (home desktop, demo mobile,
   practice, privacy, terms, and 404). Finding-level mapping is in
   `.factory/polish-2.md`.
-- Deployment and cold live check: `PENDING-DEPLOYMENT-EVIDENCE`.
+- Deployment: Static Web Apps deployment
+  `20580192-a9d0-4906-8002-ee4fc27f41f0` completed successfully. Cold live
+  checks are in `.factory/evidence/polish-2-live/live-qa.json` and the route
+  verifier outputs in the same directory. At 390 × 844, the live demo result
+  ends at y=719, so it is visible without scrolling.
 
 ## Run and verify
 
