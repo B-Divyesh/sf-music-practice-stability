@@ -1,45 +1,79 @@
-# Steady Take verification handoff — FAIL
+# Steady Take repair handoff
 
 Date: 2026-08-28 UTC
-Work order: `music-practice-stability-verify-3`
-Candidate: `c7e3eb8b245ad2a8d6de65c7fe87b70d9cba062c`
-Live URL: <https://music-practice-stability.sociobot.in>
+Work order: `music-practice-stability-repair-3`
+Base verified: `c7e3eb8b245ad2a8d6de65c7fe87b70d9cba062c`
 
-## Release decision
+## Repair completed
 
-**FAIL — do not release.** The candidate and live deployment otherwise pass
-the clean install, all 15 registered claim commands, 62-test suite, production
-build, live PWA/offline, privacy, security-header, accessibility, keyboard,
-mobile, and deployment-parity checks. Full evidence is in
-`.factory/verification-3.md`.
+The independent verifier's remaining release blocker was the paid purchase
+claim set. The product and its hosted checkout promised a **$12 one-time
+purchase** and **unlimited practice passages**, but the claim registry only
+proved three passages and did not include the price/one-time fact.
 
-## Blocking defect
+- The paid section and README now use the same precise unlimited-passage
+  wording as the hosted checkout.
+- `paid-passages` now records the exact unlimited-passage claim. Its
+  regression starts at `/demo`, uses the explicit Start for real transition,
+  activates a fixture license, saves 25 distinct real passages, and asserts
+  every passage is still available. There is no paid passage cap in product
+  code.
+- `full-version-price` registers the $12 one-time claim. Its regression starts
+  at `/demo`, follows the product checkout endpoint without entering payment
+  data, and asserts the hosted Dodo page contains `Steady Take Full Version`,
+  `$12.00`, and the exact one-time/unlimited wording.
+- The copy audit was updated for the corrected paid sentence. All landing
+  sentences remain at or below 22 words, with no banned terms.
 
-The public **$12 one-time purchase** claim on the landing page/README is not in
-`.factory/claims.json` and has no tagged sandbox test. The product-linked Dodo
-checkout also promises **“Saves unlimited practice passages on this device,”**
-while the registered `paid-passages` claim proves only three passages and says
-“more than one.” These are visitor-reliant paid facts without the recurring
-proof required by the claims contract.
+## Verification
 
-Observed checkout and live landing price agree today; that one-time observation
-does not replace a registered claim test.
-
-## Required next step
-
-Register and prove the exact public purchase facts from the demo sandbox, or
-narrow/remove the public wording to match a registered, testable claim. Then
-rerun every claims command, `npm test`, `npm run build`, and independent live
-verification.
-
-## Verification summary
+Run from a clean dependency install:
 
 ```text
-npm ci        PASS — 22 packages; 0 vulnerabilities
-npm test      PASS — 62/62
-npm run build PASS — typecheck and dist/
+npm ci                                      PASS — 22 packages, 0 vulnerabilities
+npm test                                    PASS — 62/62 Playwright tests
+npm test -- --grep @claim:paid-passages     PASS — desktop + 390 px mobile
+npm test -- --grep @claim:full-version-price PASS — desktop + 390 px mobile
+npm run build                               PASS — TypeScript check and dist/
 ```
 
-Live content hashes for `/`, `app-KLmQtiuR.js`, and `sw.js` exactly equal the
-fresh candidate build. The invalid-license API allowed 30 requests, then
-returned HTTP 429 with `Retry-After: 4` on request 31.
+All 16 claim IDs have one matching `@claim:` regression. The full Playwright
+run covers desktop and 390 px mobile, keyboard skip-link flow, 200% text size,
+route accessibility via Axe (no serious or critical findings), malformed
+backup recovery, paid offline/revocation behavior, offline demo reload, and
+the updated checkout contract.
+
+Fresh production output:
+
+```text
+dist/assets/app-BHif_FO9.js       30,798 bytes raw / 11,272 bytes gzip
+dist/assets/index-C3V7n6GS.css    21,581 bytes raw /  5,571 bytes gzip
+dist/sw.js                         1,623 bytes raw
+```
+
+`/opt/fleet/lib/verify-url.sh` passed against the local production preview for
+`/` and `/demo`: route-specific title, `lang=en`, one h1, one main, complete
+image alt text, labeled buttons, and no console/page errors. The JSON reports
+and desktop/mobile screenshots are in `.factory/evidence/repair-3-local/`.
+The standalone `@axe-core/cli` was attempted but this worker image has no
+`chromedriver`; the pinned repository Playwright/Axe integration is the
+successful accessibility evidence.
+
+## Run and deploy
+
+```sh
+npm ci
+npm test
+npm run build
+```
+
+Deploy the generated `dist/` directory as the existing static PWA. The static
+host configuration preserves the product routes, real 404 response override,
+immutable hashed assets, security headers, and service-worker cache policy.
+
+## Known boundaries
+
+No physical MIDI instrument, acoustic microphone input, or completed payment
+was used. Fake browser media/MIDI fixtures exercise those input paths; the
+paid claim opens checkout but does not submit purchaser data. Deployment/live
+identity evidence is added after the repair commit is pushed.

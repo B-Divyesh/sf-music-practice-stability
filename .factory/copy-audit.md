@@ -24,7 +24,7 @@ exceeds 22 words. No banned word appears.
 | No recording is kept. | 4 |
 | Only onset times and your passage history are stored on this device. | 11 |
 | Practice one passage free. | 4 |
-| The full version adds unlimited saved passages. | 6 |
+| The full version saves unlimited practice passages on this device. | 10 |
 | Sociobot is the merchant of record. | 6 |
 | Purchase terms apply. | 3 |
 

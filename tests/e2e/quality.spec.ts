@@ -138,11 +138,19 @@ test('static host config preserves real 404s and immutable hashed assets', ({}, 
   expect(config.routes.find((route) => route.route === '/assets/*')?.headers?.['Cache-Control']).toBe('public, max-age=31536000, immutable');
 });
 
-test('registered checkout opens a hosted Dodo checkout', async ({}, testInfo) => {
-  test.skip(testInfo.project.name !== 'chromium', 'Live integration only needs one assertion.');
+test('@claim:full-version-price hosted checkout states the exact one-time purchase', async ({ page }) => {
+  await page.goto('/demo');
+  await expect(page.getByRole('heading', { name: 'Explore a steadier passage', level: 1 })).toBeVisible();
   const response = await fetch('https://api.sociobot.in/api/v1/products/music-practice-stability/checkout', { redirect: 'manual' });
   expect(response.status).toBe(303);
-  expect(response.headers.get('location')).toMatch(/^https:\/\/checkout\.dodopayments\.com\/session\//);
+  const checkoutUrl = response.headers.get('location');
+  expect(checkoutUrl).toMatch(/^https:\/\/checkout\.dodopayments\.com\/session\//);
+  const checkout = await fetch(checkoutUrl!);
+  expect(checkout.status).toBe(200);
+  const checkoutHtml = await checkout.text();
+  expect(checkoutHtml).toContain('Steady Take Full Version');
+  expect(checkoutHtml).toContain('$12.00');
+  expect(checkoutHtml).toContain('One-time unlock for Steady Take. Saves unlimited practice passages on this device.');
 });
 
 test('demo reset restores its isolated sample', async ({ page }) => {

@@ -113,7 +113,7 @@ function landing(): string {
     </section>
     <section class="paid-section" aria-labelledby="paid-title">
       <div class="price-stamp"><span>One time</span><strong>$12</strong></div>
-      <div><p class="eyebrow"><span>05</span> Full version</p><h2 id="paid-title">Keep every passage</h2><p>Practice one passage free. The full version saves more than one passage.</p>
+      <div><p class="eyebrow"><span>05</span> Full version</p><h2 id="paid-title">Keep every passage</h2><p>Practice one passage free. The full version saves unlimited practice passages on this device.</p>
       <div class="paid-actions"><a class="button secondary" href="${CHECKOUT}">Buy the full version</a><button class="text-button" data-action="show-license">Have a license?</button></div>
       <form id="license-form" class="license-form hidden"><label for="license-token">License token</label><div><input id="license-token" name="license" autocomplete="off" required><button class="button small" type="submit">Verify license</button></div><p>Sociobot is the merchant of record. Purchase terms apply.</p></form></div>
     </section>

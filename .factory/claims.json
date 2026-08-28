@@ -57,10 +57,17 @@
   },
   {
     "id": "paid-passages",
-    "claim": "A valid full-version license saves more than one passage",
-    "where": "paid section and README",
+    "claim": "A valid full-version license saves unlimited practice passages on this device",
+    "where": "paid section, hosted checkout, and README",
     "test": "npm test -- --grep @claim:paid-passages",
-    "sandbox": "fresh browser context with a fixture verify response; activate a license and save three passages"
+    "sandbox": "fresh browser context enters /demo, starts for real, activates a fixture license, and saves 25 distinct passages without a product limit"
+  },
+  {
+    "id": "full-version-price",
+    "claim": "The Steady Take full version is a $12 one-time purchase",
+    "where": "paid section, terms, README, and hosted checkout",
+    "test": "npm test -- --grep @claim:full-version-price",
+    "sandbox": "fresh browser context enters /demo; test follows the product checkout endpoint without payment and asserts the hosted checkout states $12.00 and one-time unlock"
   },
   {
     "id": "controlled-takes",

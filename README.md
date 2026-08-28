@@ -55,8 +55,8 @@ assess technique.
 
 ## Full version
 
-The free version saves one passage. A $12 one-time purchase saves more than one
-passage. Checkout and license verification use the
+The free version saves one passage. A $12 one-time purchase saves unlimited
+practice passages on this device. Checkout and license verification use the
 Sociobot billing API. No payment provider is embedded in this app.
 
 ## Deploy

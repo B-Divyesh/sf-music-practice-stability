@@ -110,27 +110,25 @@ test('@claim:free-passage-limit free mode keeps one passage', async ({ page }) =
   await expect(page.getByText('The free version saves one passage. Buy the full version to add another.')).toBeVisible();
 });
 
-test('@claim:paid-passages valid license saves more than one passage', async ({ page }) => {
+test('@claim:paid-passages valid license has no product passage cap', async ({ page }) => {
   await page.route('https://api.sociobot.in/api/v1/products/music-practice-stability/verify?license=valid-test', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ valid: true, reason: 'ok' }) }));
-  await page.goto('/');
+  await page.goto('/demo');
+  await page.getByRole('link', { name: 'Start for real' }).click();
+  await page.getByRole('link', { name: 'Steady Take home' }).click();
   await page.getByRole('button', { name: 'Have a license?' }).click();
   await page.getByLabel('License token').fill('valid-test');
   await page.getByRole('button', { name: 'Verify license' }).click();
   await expect(page.getByText('Full version active on this device.')).toBeVisible();
   await page.getByRole('link', { name: 'Practice' }).click();
-  await page.getByLabel('Passage name').fill('D minor turn');
-  await page.getByRole('button', { name: 'Set this passage' }).click();
-  await expect(page.getByRole('heading', { name: 'D minor turn', level: 2 })).toBeVisible();
-  await page.getByRole('button', { name: 'Add passage', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Set another passage', level: 2 })).toBeVisible();
-  await page.getByLabel('Passage name').fill('A major shift');
-  await page.getByRole('button', { name: 'Set this passage' }).click();
-  await expect(page.getByRole('heading', { name: 'A major shift', level: 2 })).toBeVisible();
-  await page.getByRole('button', { name: 'Add passage', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Set another passage', level: 2 })).toBeVisible();
-  await page.getByLabel('Passage name').fill('E minor return');
-  await page.getByRole('button', { name: 'Set this passage' }).click();
-  await expect(page.locator('.passage-picker>div button')).toHaveCount(3);
+  const passageCount = 25;
+  for (let index = 1; index <= passageCount; index += 1) {
+    const name = `Licensed passage ${index}`;
+    await page.getByLabel('Passage name').fill(name);
+    await page.getByRole('button', { name: 'Set this passage' }).click();
+    await expect(page.getByRole('heading', { name, level: 2 })).toBeVisible();
+    if (index < passageCount) await page.getByRole('button', { name: 'Add passage', exact: true }).click();
+  }
+  await expect(page.locator('.passage-picker>div button')).toHaveCount(passageCount);
 });
 
 test('@claim:controlled-takes controlled marks persist with the saved session', async ({ page }) => {
