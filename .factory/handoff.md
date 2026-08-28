@@ -1,43 +1,81 @@
-# Steady Take adversarial review handoff
+# Steady Take polish 1 handoff
 
 Date: 2026-08-28 UTC
 
-Work order: `music-practice-stability-review-1`
+Work order: `music-practice-stability-polish-1`
 
-Candidate reviewed: `7cfbc65ecc1e613e0f49a0140ae16d7889896fb1`
+Production: <https://music-practice-stability.sociobot.in>
+
+Demo: <https://music-practice-stability.sociobot.in/?demo=1>
 
 ## Outcome
 
-**FAIL** — `.factory/review-1.md` records 16 findings: one blocking, four
-major, and eleven minor. Product code was not modified.
+PASS. Every finding F-1-1 through F-1-16 in `.factory/review-1.md` is fixed,
+tested, deployed, and cold-checked. Git history contains no earlier review or
+polish report. The finding-by-finding map is `.factory/polish-1.md`.
 
-The blocker is the one-click demo presentation: its promised 26 ms / 52%
-improvement result is 2,295 px down the 390 px page rather than visible in the
-first post-click viewport. Unlisted microphone, storage-fallback, and payment
-claims also prevent acceptance.
+## What changed
 
-## Verification performed
+- The home headline and supporting copy now state the timing-consistency job in
+  plain words. All three privacy, offline, and price facts fit at 1440 × 900.
+- “Try it with sample data” opens `/?demo=1` in one click. Its persistent banner
+  offers reset and exit actions, while sessionStorage remains separate from real
+  IndexedDB data. The measured 26 ms / 52% result and small chart fit within the
+  first 390 × 844 viewport.
+- Practice now has an optional local BPM reference pulse with audible and visual
+  beats, mute, and stop controls. It makes no network request.
+- Microphone copy now uses “attack.” A deterministic analyser fixture verifies
+  that steady background input is ignored and four separated impulses are
+  captured.
+- IndexedDB failure recovery, payment hosting, and the reference pulse are now
+  registered claims with observable tests. All 20 claim IDs have exactly one
+  matching test.
+- Every route now sets its own title, description, canonical, Open Graph, and
+  Twitter metadata. SPA navigation and browser history focus the new h1 and
+  announce the route. The static 404 has literal copy, metadata, favicon, and a
+  real HTTP 404 response.
+- Purchase copy consistently says Dodo hosts checkout and handles payment
+  through Sociobot. License activation links directly to the purchase terms.
+- The measured-generative-geometry identity, original art, local-first PWA,
+  static deployment class, export/import controls, and paid-unlock flow remain.
 
-- Opened the live home and demo cold at 390 × 844 and 1440 × 900.
-- Exercised demo add/reset, real/demo isolation, direct demo entry, and live
-  service-worker offline reload.
-- Recorded the live demo request stream and confirmed same-origin-only traffic.
-- Ran all 16 claim commands separately from a fresh `--no-local` clone: 32/32
-  desktop/mobile executions passed.
-- Ran the complete clean-clone suite: 61 passed, 1 intentional duplicate static
-  check skipped.
-- Ran `npm run build`: passed and produced `dist/`; app JS was 11.27 kB gzip.
-- Crawled live links and routes, checked status, titles, h1/main/lang,
-  canonicals, metadata, headers, keyboard route focus/back behavior, and the
-  designed 404.
-- Ran live Axe checks on all routes and the 404 at desktop and mobile sizes:
-  zero serious/critical findings.
-- Ran `/opt/fleet/lib/verify-url.sh` against the live home: passed with no
-  console errors.
-- Read the brief, design, claims, demo record, README, source, tests, and the
-  prior handoff. No earlier review or polish file exists.
+## Exact verification evidence
 
-## Reproduce
+Clean clone `/tmp/steady-take-clean-5E3YN6` at
+`b000074fcc2be704d522116c7bf310cd070c62b6`:
+
+- Each of the 20 commands in `.factory/claims.json` ran separately and passed in
+  desktop Chromium and the 390 px mobile project: 40/40 claim executions.
+- `npm test`: 73 passed; one intentional mobile duplicate of the static config
+  assertion skipped.
+- `npm run build`: passed; `dist/index.html` produced. Initial app JS is 12.54
+  kB gzip and CSS is 5.97 kB gzip.
+
+Local evidence:
+
+- Factory URL checks: `.factory/evidence/polish-1-local/home/verify.json` and
+  `.factory/evidence/polish-1-local/demo/verify.json`; zero console errors, one
+  h1, `lang=en`, main landmark, complete image alt text, and labeled buttons.
+- Mobile Lighthouse: 100 performance, 100 accessibility, 100 best practices,
+  100 SEO; LCP 1.7 s, CLS 0, TBT 0 ms.
+
+Production evidence after deployment `7c2371fd-b3a6-4079-bff0-adfacfa10e31`:
+
+- Factory URL checks on cold home and demo contexts: zero console/page errors;
+  reports and screenshots are under `.factory/evidence/polish-1-live/home/`
+  and `.factory/evidence/polish-1-live/demo/`.
+- `.factory/evidence/polish-1-live/live-qa.json`: home facts above the fold;
+  query demo banner/result/chart/reset; reference pulse; unique route metadata;
+  forward/back focus; zero serious/critical Axe findings; offline demo reload;
+  Dodo checkout redirect; and styled unknown route with HTTP 404.
+- `.factory/evidence/polish-1-live/demo-first-screen.png`: cold 390 × 844 demo
+  first viewport.
+- `.factory/evidence/polish-1-live/404-mobile.png`: production 404 at 390 px.
+- Production mobile Lighthouse: 100 performance, 100 accessibility, 100 best
+  practices, 100 SEO; LCP 1.5 s, CLS 0, TBT 0 ms. JSON is
+  `.factory/evidence/polish-1-live/lighthouse-mobile.json`.
+
+## Run and verify
 
 ```sh
 npm ci
@@ -45,12 +83,14 @@ npm test
 npm run build
 ```
 
-Claim commands are listed in `.factory/claims.json`. The complete first-read,
-copy audit, finding details, claim results, history check, and required fixes
-are in `.factory/review-1.md`.
+Every claim command is listed in `.factory/claims.json`. Deploy `dist/` with:
 
-## Next step
+```sh
+/opt/fleet/lib/deploy-static.sh music-practice-stability dist
+```
 
-Address every finding, deploy the repaired candidate, and rerun the full review
-from scratch. Do not treat the passing existing suite as acceptance: it does
-not cover the demo first viewport or the unlisted claims identified here.
+## Known gaps and next steps
+
+None for the reviewed scope. No AI feature was added because timing capture,
+local reference audio, import/export, and offline use solve the brief without a
+model or external data transfer.

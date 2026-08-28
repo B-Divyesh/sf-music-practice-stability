@@ -1,0 +1,72 @@
+{
+  "checkedAt": "2026-08-28T21:26:19.936Z",
+  "origin": "https://music-practice-stability.sociobot.in",
+  "routes": [
+    {
+      "path": "/practice",
+      "status": 200,
+      "title": "Practice timing — Steady Take",
+      "description": "Set a short passage, capture six takes, and compare the timing spread between matching attacks.",
+      "seriousAxe": 0,
+      "errors": []
+    },
+    {
+      "path": "/?demo=1",
+      "status": 200,
+      "title": "Demo — Steady Take",
+      "description": "Try six sample practice sessions in an isolated demo that does not use your practice history.",
+      "seriousAxe": 0,
+      "errors": []
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "title": "Privacy — Steady Take",
+      "description": "Read what Steady Take stores on your device and when it makes a network request.",
+      "seriousAxe": 0,
+      "errors": []
+    },
+    {
+      "path": "/terms",
+      "status": 200,
+      "title": "Terms — Steady Take",
+      "description": "Read the terms for using Steady Take and buying its full version.",
+      "seriousAxe": 0,
+      "errors": []
+    }
+  ],
+  "checks": {
+    "home": {
+      "headline": true,
+      "copy": true,
+      "factsAboveFold": true,
+      "demoLink": true,
+      "purchaseTerms": true,
+      "errors": []
+    },
+    "demo": {
+      "banner": true,
+      "resultAboveFold": true,
+      "result": "54 ms to 26 ms, 52% lower, six sessions",
+      "reset": true,
+      "pulse": true,
+      "errors": []
+    },
+    "notFound": {
+      "status": 404,
+      "title": true,
+      "metadata": true,
+      "literalCopy": true,
+      "expectedNavigation404": [
+        "Failed to load resource: the server responded with a status of 404 ()"
+      ],
+      "unexpectedErrors": []
+    },
+    "routeFocus": true,
+    "offlineReload": true,
+    "checkout": {
+      "status": 303,
+      "host": "checkout.dodopayments.com"
+    }
+  }
+}

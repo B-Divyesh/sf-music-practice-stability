@@ -12,7 +12,7 @@ Review source: `.factory/review-1.md` at
 
 | Finding | Change made | Evidence |
 | --- | --- | --- |
-| F-1-1 | Added a compact 26 ms / 54 ms / six-session result and chart before every demo control. The primary action now opens the isolated `/?demo=1` path. | `@claim:sample-improvement`; `.factory/evidence/polish-1-local/demo-mobile.png`; live `/?demo=1` |
+| F-1-1 | Added a compact 26 ms / 54 ms / six-session result and chart before every demo control. The primary action now opens the isolated `/?demo=1` path. | `@claim:sample-improvement`; `.factory/evidence/polish-1-live/demo-first-screen.png`; live `/?demo=1` |
 | F-1-2 | Replaced “onset” and unsupported room claims with plain attack-detection instructions. Registered and tested steady background frames plus four separated impulses through the actual analyser loop. | `@claim:microphone-detection`; live landing limits |
 | F-1-3 | Registered the existing IndexedDB failure behavior and proved a passage survives reload from `steady-take:fallback`. | `@claim:storage-fallback`; live `/practice` |
 | F-1-4 | Standardized the payment sentence to “Dodo hosts checkout and handles payment through Sociobot.” Added a linked purchase-terms action and an observable redirect/no-iframe claim. | `@claim:payment-host`; `@claim:full-version-price`; live `/` and `/terms` |
@@ -31,16 +31,20 @@ Review source: `.factory/review-1.md` at
 
 ## Cross-cutting acceptance evidence
 
-- Full local suite: `npm test` — 73 passed, one intentional duplicate static
-  config check skipped across desktop and 390 px mobile projects.
-- Build: `npm run build` — 12.53 kB gzip JS, 5.97 kB gzip CSS, `dist/index.html`.
+- Clean clone `b000074fcc2be704d522116c7bf310cd070c62b6`: all 20 claim
+  commands passed separately, 40/40 desktop and mobile executions.
+- Clean-clone full suite: `npm test` — 73 passed, one intentional duplicate
+  static config check skipped across desktop and 390 px mobile projects.
+- Build: `npm run build` — 12.54 kB gzip JS, 5.97 kB gzip CSS, `dist/index.html`.
 - Accessibility: Playwright Axe on every route at both viewports — no serious
   or critical violations. Local factory URL verifier — zero console errors.
-- Performance: local mobile Lighthouse 100 performance, 100 accessibility,
-  100 best practices, 100 SEO; LCP 1.7 s, CLS 0, TBT 0 ms.
+- Performance: production mobile Lighthouse 100 performance, 100
+  accessibility, 100 best practices, 100 SEO; LCP 1.5 s, CLS 0, TBT 0 ms.
 - Privacy/offline: `@claim:local-only`, `@claim:demo-isolation`,
   `@claim:audio-not-recorded`, `@claim:license-on-demand`, and
   `@claim:offline-reload` all pass in both projects.
 
-Post-deploy evidence is recorded in `.factory/evidence/polish-1-live/` and the
-final handoff after the production cold check.
+Production cold-check evidence is in `.factory/evidence/polish-1-live/`.
+`live-qa.json` records distinct metadata, zero serious/critical Axe violations,
+route focus, the real 404, demo reset and first-viewport result, pulse controls,
+offline reload, and the Dodo checkout redirect.
