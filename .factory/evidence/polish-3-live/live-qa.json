@@ -1,0 +1,24 @@
+{
+  "base": "https://music-practice-stability.sociobot.in",
+  "checkedAt": "2026-08-28T23:36:04.720Z",
+  "checks": {
+    "demoIsolation": {
+      "demoRowsAfterAddition": 7,
+      "demoKeyAfterStartForReal": null,
+      "freshDemoRows": 6
+    },
+    "noServiceWorker": {
+      "connectionStatus": "Online only"
+    },
+    "permissionsOnDemand": {
+      "calls": {
+        "microphone": 1,
+        "midi": 1
+      }
+    },
+    "offlineLicenseCache": {
+      "alert": "Could not check the license. Saved full-version access stays active until you reconnect.",
+      "paidPassageControl": true
+    }
+  }
+}

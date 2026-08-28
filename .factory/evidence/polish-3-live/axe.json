@@ -1,0 +1,66 @@
+{
+  "base": "https://music-practice-stability.sociobot.in",
+  "checkedAt": "2026-08-28T23:36:32.115Z",
+  "results": [
+    {
+      "viewport": "desktop",
+      "path": "/",
+      "violations": 0,
+      "seriousOrCritical": 0
+    },
+    {
+      "viewport": "desktop",
+      "path": "/practice",
+      "violations": 0,
+      "seriousOrCritical": 0
+    },
+    {
+      "viewport": "desktop",
+      "path": "/?demo=1",
+      "violations": 0,
+      "seriousOrCritical": 0
+    },
+    {
+      "viewport": "desktop",
+      "path": "/privacy",
+      "violations": 0,
+      "seriousOrCritical": 0
+    },
+    {
+      "viewport": "desktop",
+      "path": "/terms",
+      "violations": 0,
+      "seriousOrCritical": 0
+    },
+    {
+      "viewport": "mobile",
+      "path": "/",
+      "violations": 0,
+      "seriousOrCritical": 0
+    },
+    {
+      "viewport": "mobile",
+      "path": "/practice",
+      "violations": 0,
+      "seriousOrCritical": 0
+    },
+    {
+      "viewport": "mobile",
+      "path": "/?demo=1",
+      "violations": 0,
+      "seriousOrCritical": 0
+    },
+    {
+      "viewport": "mobile",
+      "path": "/privacy",
+      "violations": 0,
+      "seriousOrCritical": 0
+    },
+    {
+      "viewport": "mobile",
+      "path": "/terms",
+      "violations": 0,
+      "seriousOrCritical": 0
+    }
+  ]
+}

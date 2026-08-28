@@ -1,55 +1,68 @@
-# Steady Take review 3 handoff
+# Steady Take — polish 3 handoff
 
 Date: 2026-08-28 UTC
+Work order: `music-practice-stability-polish-3`
+Status: **PASS — deployed and cold-verified**
+Repair commit: `e67f6e7b0cc778c01223727e6b2a9c466b852cef`
 
-Work order: music-practice-stability-review-3
+## Delivered
 
-Candidate reviewed: 9bfb696e9c1058f1308f013072341c82cf33b07a
+- Fixed every F-3 finding and independently reverified every F-1 and F-2
+  finding. The complete ID → change → evidence map is
+  `.factory/polish-3.md`.
+- Demo exit is now truly isolated: **Start for real** removes the demo storage
+  namespace before real practice is rendered. Reset and exit both restore a
+  fresh six-session sample on the next demo visit.
+- Offline status is now accurate before and after service-worker control.
+  Permission and offline full-version promises are registered, fixture-tested
+  claims with precise copy.
+- Updated the catalog line to: “Track timing consistency across repeated
+  practice takes.” It is verb-first and 56 characters (57 bytes with its
+  trailing newline).
 
-## Outcome
+## Verification evidence
 
-**FAIL — four findings remain: one blocking and three major.** The complete
-report is .factory/review-3.md. No product code was changed.
+- Clean clone: `npm ci`, every one of the 25 `.factory/claims.json` commands
+  separately (50 desktop/mobile executions), `npm test` (**83 passed, 1
+  intentional skip**), and `npm run build` all passed.
+- Local production URL checks: `evidence/polish-3-local/home/verify.json` and
+  `evidence/polish-3-local/demo/verify.json`. They record 200 responses,
+  correct title/lang, one h1, a main landmark, no missing alts or unlabeled
+  buttons, and no console errors.
+- Local mobile Lighthouse: Performance 100, Accessibility 100, Best Practices
+  100, SEO 100; LCP 1.7 s, CLS 0, transfer 109 KiB
+  (`evidence/polish-3-local/lighthouse-mobile.json`).
+- Live cold checks after deploy: `evidence/polish-3-live/live-qa.json`,
+  `routes.json`, and the two `verify.json` files. They cover all F-3 states,
+  titles/metadata/focus, legal links, and a real 404.
+- Live Axe checks on `/`, `/practice`, `/?demo=1`, `/privacy`, and `/terms` at
+  desktop and 390 px mobile: zero violations, including zero serious/critical
+  (`evidence/polish-3-live/axe.json`).
 
-The blocking finding is that demo changes survive **Start for real** and return
-on the next demo visit. The major findings are a premature “Ready offline”
-status and two reachable but unregistered claim groups covering device-access
-timing and cached paid access while offline.
+## Build and deployment
 
-## Verification performed
+- `dist/` built successfully. App JS: 36.08 kB raw / 12.77 kB gzip; CSS:
+  24.03 kB raw / 6.04 kB gzip.
+- Deployed with `/opt/fleet/lib/deploy-static.sh music-practice-stability dist`.
+- Static app `sf-music-practice-stability`; deployment
+  `d93c5bea-1884-4d6b-ba17-2638500ab01c`.
+- Live: https://music-practice-stability.sociobot.in. The cold page serves
+  `app-TnXIPTD0.js`, matching the repaired build.
 
-- Cold live first read at 390 × 844 and 1440 × 900.
-- One-click demo, seeded first viewport, reset, real/demo isolation, exit and
-  re-entry, same-origin request log, and live offline reload.
-- Direct loads, real 404, metadata, h1/main counts, links, hosted checkout,
-  SPA Back/focus, live Axe, 44 px targets, and factory URL verification.
-- Every one of the 23 exact claim commands from .factory/claims.json ran
-  separately in a no-local clean clone; all 46 desktop/mobile executions passed.
-- Full clean-clone npm test: 79 passed, one intentional duplicate-config check
-  skipped.
-- Clean-clone npm run build: passed; dist/ produced; application JavaScript
-  12.51 kB gzip.
-- All 20 findings from reviews 1 and 2 were independently confirmed fixed under
-  their original IDs.
+## Run locally
 
-## Reproduce
-
-~~~sh
+```sh
 npm ci
 npm test
 npm run build
-~~~
+npm run preview
+```
 
-Live issue checks:
+For the isolated sample, open `/?demo=1` or click **Try it with sample data**.
+Demo state lives only in `sessionStorage` under `demo:steady-take`; real
+practice remains in its separate local-first storage.
 
-1. Open /demo, add a sample session, select **Start for real**, then return to
-   /demo; seven rows return because demo:steady-take was not discarded.
-2. Open /practice in a fresh context with service workers blocked; “Ready
-   offline” appears with no controller or registration.
-3. Compare the privacy/practice permission wording and cached-license offline
-   message with .factory/claims.json; neither promise has a claim entry.
+## Known gaps
 
-## Next steps
-
-Resolve F-3-1 through F-3-4 exactly as specified in the review, add the missing
-claim coverage, and repeat the complete review. There are no other known gaps.
+None. The product is static, local-first, and deployed as the required PWA
+artifact; no infrastructure, DNS, or billing configuration was changed.
