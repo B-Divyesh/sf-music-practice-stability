@@ -1,0 +1,112 @@
+{
+  "checkedAt": "2026-08-29T00:43:30.835Z",
+  "origin": "https://music-practice-stability.sociobot.in",
+  "routes": [
+    {
+      "path": "/",
+      "status": 200,
+      "title": "Steady Take — measure timing consistency",
+      "description": "Measure timing consistency across repeated practice takes. Audio and practice history stay on your device.",
+      "h1": "Measure timing consistency across takes",
+      "applicationConsoleErrors": []
+    },
+    {
+      "path": "/practice",
+      "status": 200,
+      "title": "Practice timing — Steady Take",
+      "description": "Set a short passage, capture six takes, and compare the timing spread between matching attacks.",
+      "h1": "Measure your next six takes",
+      "applicationConsoleErrors": []
+    },
+    {
+      "path": "/?demo=1",
+      "status": 200,
+      "title": "Demo — Steady Take",
+      "description": "Try six sample practice sessions in an isolated demo that does not use your practice history.",
+      "h1": "Review sample timing improvement",
+      "applicationConsoleErrors": []
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "title": "Privacy — Steady Take",
+      "description": "Read what Steady Take stores on your device and when it makes a network request.",
+      "h1": "How Steady Take handles data",
+      "applicationConsoleErrors": []
+    },
+    {
+      "path": "/terms",
+      "status": 200,
+      "title": "Terms — Steady Take",
+      "description": "Read the terms for using Steady Take and buying its full version.",
+      "h1": "Terms for using Steady Take",
+      "applicationConsoleErrors": []
+    },
+    {
+      "path": "/missing-polish-4",
+      "status": 404,
+      "title": "Page not found — Steady Take",
+      "description": "This address does not match a Steady Take page. Return home or open the practice tool.",
+      "h1": "Page not found",
+      "applicationConsoleErrors": []
+    }
+  ],
+  "demo": {
+    "banner": true,
+    "firstViewportBottom": 719,
+    "viewportHeight": 844,
+    "initialSessions": 6,
+    "resetSessions": 6,
+    "exitDiscarded": true,
+    "reentrySessions": 6,
+    "storage": {
+      "local": [],
+      "session": [
+        "demo:steady-take"
+      ],
+      "databases": []
+    },
+    "offlineReload": true,
+    "externalRequests": [],
+    "consoleErrors": []
+  },
+  "navigation": {
+    "forwardFocus": true,
+    "backFocus": true
+  },
+  "manifest": {
+    "status": 200,
+    "name": "Steady Take — timing consistency practice",
+    "description": "Measure timing consistency across repeated practice takes.",
+    "startUrl": "/practice?v=2",
+    "display": "standalone"
+  },
+  "headers": {
+    "homeStatus": 200,
+    "unknownStatus": 404,
+    "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self'; connect-src 'self' https://api.sociobot.in; media-src 'self' blob:; worker-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'self' https://api.sociobot.in; frame-ancestors 'none'",
+    "referrerPolicy": "strict-origin-when-cross-origin",
+    "contentTypeOptions": "nosniff",
+    "permissionsPolicy": "camera=(), geolocation=(), microphone=(self)"
+  },
+  "accessibility": {
+    "/": {
+      "seriousOrCritical": 0
+    },
+    "/practice": {
+      "seriousOrCritical": 0
+    },
+    "/?demo=1": {
+      "seriousOrCritical": 0
+    },
+    "/privacy": {
+      "seriousOrCritical": 0
+    },
+    "/terms": {
+      "seriousOrCritical": 0
+    },
+    "/missing-polish-4": {
+      "seriousOrCritical": 0
+    }
+  }
+}

@@ -1,45 +1,93 @@
-# Steady Take — review 4 handoff
+# Steady Take — polish 4 handoff
 
 Date: 2026-08-29 UTC
 
-Work order: `music-practice-stability-review-4`
+Work order: `music-practice-stability-polish-4`
 
-Reviewed candidate: `7cb914dcc88b296d12f3974b91d3180121f2217e`
+Base: `2a3a4507997c1dfb6fa0dc75c7302d1d705c0509`
 
-Status: **FAIL — one minor copy finding, no blocking findings**
+Product repair: `7a99c8dc0bd973063fc1614d81c06d978cffa00d`
+
+Status: **Complete — zero review findings remain**
 
 ## Delivered
 
-- Wrote `.factory/review-4.md` with the cold mobile/desktop first read, complete
-  landing and README sentence counts, demo and storage checks, all claim
-  results, all 24 earlier-finding checks, route/link/accessibility checks,
-  missed-leverage analysis, and final verdict.
-- Confirmed the one-click demo immediately shows the six-session 54-to-26 ms
-  result, resets correctly, discards changes on exit, keeps real data separate,
-  reloads offline, and makes only same-origin requests.
-- Identified one remaining minor issue: “timing consistency” and “timing
-  stability” name the same core outcome on the landing page and README.
-- Did not modify product code, tests, configuration, or deployed infrastructure.
+- Closed F-4-1 by using “timing consistency” on every visitor-facing surface:
+  application and 404 footers, README opening, initial metadata, and PWA
+  manifest. A browser/source regression test prevents the old term returning.
+- Re-audited all 24 earlier findings rather than relying on prior closure. The
+  first-screen facts, isolated one-click demo, claim tests, reference pulse,
+  real routes and 404, focus restoration, legal copy, storage boundaries,
+  mobile layout, and offline states remain correct.
+- Updated `.factory/catalog-description.txt` to the 58-character verb-first
+  sentence “Measure timing consistency across repeated practice takes.”
+- Updated `.factory/copy-audit.md` and wrote `.factory/polish-4.md` with an
+  explicit finding → change → evidence row for all 25 cumulative findings.
+- Preserved the measured-generative-geometry identity: warm graph paper,
+  cut-paper timing rows, ink navy, coral attacks, mint results, Fraunces
+  numerals, clipped corners, and non-looping motion.
 
-## Verification
+## How to run and verify
 
-- Fresh no-local remote clone: `/tmp/steady-take-review4-19fzdD/repo`.
-- `npm ci` passed.
-- Every one of the 25 `.factory/claims.json` commands ran independently and
-  passed in desktop and mobile: 50/50 claim executions.
-- Full `npm test`: 83 passed, one intentional duplicate config check skipped.
-- `npm run build`: passed; `dist/index.html` exists; app JavaScript is 12.77 kB
-  gzip.
-- Live factory URL verifier passed `/` and `/?demo=1` with zero console errors.
-- Live Axe scans on `/`, `/practice`, `/demo`, `/privacy`, `/terms`, and the 404
-  found zero violations.
-- Live deep links, Back/focus behavior, sitemap assets, and all rendered links
-  were checked. The unknown route returns a designed HTTP 404.
-- The live hashed JS and CSS filenames match the clean production build.
+```sh
+npm ci
+npm test
+npm run build
+npm run preview -- --port 4173
+```
 
-## Remaining work
+The supported demo entry point is `/?demo=1`; `/demo` remains its route alias.
+Every command in `.factory/claims.json` can also be run independently.
 
-Resolve F-4-1 by standardizing the visitor-facing core term to “timing
-consistency,” including the landing footer, README opening, manifest, and
-initial HTML description. Rerun the copy audit and confirm no user-facing
-“timing stability” occurrence remains. No functional or blocking gap was found.
+## Exact verification
+
+- Clean clone: `/tmp/steady-take-polish4-clean-eJjEPe/repo`, commit
+  `7a99c8dc0bd973063fc1614d81c06d978cffa00d`.
+- `npm ci`: passed with zero vulnerabilities.
+- Every registered claim command: 25/25 passed independently in Chromium and
+  390 px mobile, for 50/50 claim executions.
+- Full clean-clone `npm test`: 85 passed; one intentionally duplicated
+  static-config assertion skipped in the mobile project.
+- `npm run build`: passed and produced `dist/index.html`.
+- Bundle sizes: JS 36.08 kB raw / 12.70 kB gzip; CSS 24.03 kB raw / 6.06 kB
+  gzip. Both are far below the static product budgets.
+- Accessibility: Playwright Axe found zero serious or critical violations on
+  every route and the 404 in desktop and mobile. Keyboard skip, forward/Back
+  h1 focus, 44 px targets, 200% text, form errors, chart text, and reduced
+  motion all pass the full suite.
+- Factory URL verifier: live `/`, `/?demo=1`, `/privacy`, and `/terms` returned
+  200 with correct title/lang/main/h1/alt/labels and zero console errors.
+- Demo/privacy/offline: cold live `/?demo=1` used only
+  `sessionStorage["demo:steady-take"]`, created no IndexedDB database or
+  localStorage key, made no external request, reset to six sessions, discarded
+  changes on Start for real, and reloaded its seed offline.
+- Routing: live `/practice`, `/?demo=1`, `/privacy`, and `/terms` have distinct
+  title/description metadata. `/missing-polish-4` returned HTTP 404 with the
+  designed page. Forward and Back navigation focused the new h1.
+- Security: live headers include CSP with response-header `frame-ancestors`,
+  HSTS, `nosniff`, strict-origin referrer policy, and microphone-only permission
+  policy.
+- Live Lighthouse 12.8.2: Performance 100, Accessibility 100, Best Practices
+  100, SEO 100; FCP 0.9 s, LCP 1.5 s, TBT 0 ms, CLS 0, transfer 133,235 bytes.
+
+Evidence is in `.factory/evidence/polish-4-local/` and
+`.factory/evidence/polish-4-live/`. The cumulative mapping is in
+`.factory/polish-4.md`.
+
+## Deployment
+
+- Command: `/opt/fleet/lib/deploy-static.sh music-practice-stability dist`
+- Static app: `sf-music-practice-stability`
+- Deployment ID: `cc18382e-d587-4ef4-9fd9-6da2446846ef`
+- Live URL: <https://music-practice-stability.sociobot.in>
+- Live app bundle: `/assets/app-BiNUcb-4.js`
+- Live/local hashes match for `index.html`, app JS, CSS, `sw.js`, and
+  `manifest.webmanifest`.
+
+## Known gaps and next steps
+
+No product defect or review finding is known. Physical acoustic instruments,
+physical MIDI hardware, and a completed card payment were outside automated
+verification; deterministic browser fixtures cover microphone/MIDI behavior,
+and the live hosted checkout was inspected without submitting purchaser data.
+No follow-up implementation is required for this work order.
