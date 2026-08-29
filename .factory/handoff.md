@@ -1,68 +1,45 @@
-# Steady Take — polish 3 handoff
+# Steady Take — review 4 handoff
 
-Date: 2026-08-28 UTC
-Work order: `music-practice-stability-polish-3`
-Status: **PASS — deployed and cold-verified**
-Repair commit: `e67f6e7b0cc778c01223727e6b2a9c466b852cef`
+Date: 2026-08-29 UTC
+
+Work order: `music-practice-stability-review-4`
+
+Reviewed candidate: `7cb914dcc88b296d12f3974b91d3180121f2217e`
+
+Status: **FAIL — one minor copy finding, no blocking findings**
 
 ## Delivered
 
-- Fixed every F-3 finding and independently reverified every F-1 and F-2
-  finding. The complete ID → change → evidence map is
-  `.factory/polish-3.md`.
-- Demo exit is now truly isolated: **Start for real** removes the demo storage
-  namespace before real practice is rendered. Reset and exit both restore a
-  fresh six-session sample on the next demo visit.
-- Offline status is now accurate before and after service-worker control.
-  Permission and offline full-version promises are registered, fixture-tested
-  claims with precise copy.
-- Updated the catalog line to: “Track timing consistency across repeated
-  practice takes.” It is verb-first and 56 characters (57 bytes with its
-  trailing newline).
+- Wrote `.factory/review-4.md` with the cold mobile/desktop first read, complete
+  landing and README sentence counts, demo and storage checks, all claim
+  results, all 24 earlier-finding checks, route/link/accessibility checks,
+  missed-leverage analysis, and final verdict.
+- Confirmed the one-click demo immediately shows the six-session 54-to-26 ms
+  result, resets correctly, discards changes on exit, keeps real data separate,
+  reloads offline, and makes only same-origin requests.
+- Identified one remaining minor issue: “timing consistency” and “timing
+  stability” name the same core outcome on the landing page and README.
+- Did not modify product code, tests, configuration, or deployed infrastructure.
 
-## Verification evidence
+## Verification
 
-- Clean clone: `npm ci`, every one of the 25 `.factory/claims.json` commands
-  separately (50 desktop/mobile executions), `npm test` (**83 passed, 1
-  intentional skip**), and `npm run build` all passed.
-- Local production URL checks: `evidence/polish-3-local/home/verify.json` and
-  `evidence/polish-3-local/demo/verify.json`. They record 200 responses,
-  correct title/lang, one h1, a main landmark, no missing alts or unlabeled
-  buttons, and no console errors.
-- Local mobile Lighthouse: Performance 100, Accessibility 100, Best Practices
-  100, SEO 100; LCP 1.7 s, CLS 0, transfer 109 KiB
-  (`evidence/polish-3-local/lighthouse-mobile.json`).
-- Live cold checks after deploy: `evidence/polish-3-live/live-qa.json`,
-  `routes.json`, and the two `verify.json` files. They cover all F-3 states,
-  titles/metadata/focus, legal links, and a real 404.
-- Live Axe checks on `/`, `/practice`, `/?demo=1`, `/privacy`, and `/terms` at
-  desktop and 390 px mobile: zero violations, including zero serious/critical
-  (`evidence/polish-3-live/axe.json`).
+- Fresh no-local remote clone: `/tmp/steady-take-review4-19fzdD/repo`.
+- `npm ci` passed.
+- Every one of the 25 `.factory/claims.json` commands ran independently and
+  passed in desktop and mobile: 50/50 claim executions.
+- Full `npm test`: 83 passed, one intentional duplicate config check skipped.
+- `npm run build`: passed; `dist/index.html` exists; app JavaScript is 12.77 kB
+  gzip.
+- Live factory URL verifier passed `/` and `/?demo=1` with zero console errors.
+- Live Axe scans on `/`, `/practice`, `/demo`, `/privacy`, `/terms`, and the 404
+  found zero violations.
+- Live deep links, Back/focus behavior, sitemap assets, and all rendered links
+  were checked. The unknown route returns a designed HTTP 404.
+- The live hashed JS and CSS filenames match the clean production build.
 
-## Build and deployment
+## Remaining work
 
-- `dist/` built successfully. App JS: 36.08 kB raw / 12.77 kB gzip; CSS:
-  24.03 kB raw / 6.04 kB gzip.
-- Deployed with `/opt/fleet/lib/deploy-static.sh music-practice-stability dist`.
-- Static app `sf-music-practice-stability`; deployment
-  `d93c5bea-1884-4d6b-ba17-2638500ab01c`.
-- Live: https://music-practice-stability.sociobot.in. The cold page serves
-  `app-TnXIPTD0.js`, matching the repaired build.
-
-## Run locally
-
-```sh
-npm ci
-npm test
-npm run build
-npm run preview
-```
-
-For the isolated sample, open `/?demo=1` or click **Try it with sample data**.
-Demo state lives only in `sessionStorage` under `demo:steady-take`; real
-practice remains in its separate local-first storage.
-
-## Known gaps
-
-None. The product is static, local-first, and deployed as the required PWA
-artifact; no infrastructure, DNS, or billing configuration was changed.
+Resolve F-4-1 by standardizing the visitor-facing core term to “timing
+consistency,” including the landing footer, README opening, manifest, and
+initial HTML description. Rerun the copy audit and confirm no user-facing
+“timing stability” occurrence remains. No functional or blocking gap was found.
