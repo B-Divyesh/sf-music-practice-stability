@@ -1,1 +1,1 @@
-Track timing consistency across repeated practice takes.
+Measure timing consistency across repeated practice takes.

@@ -1,6 +1,6 @@
 # Steady Take
 
-Steady Take measures timing stability across repeated practice takes. It is for
+Steady Take measures timing consistency across repeated practice takes. It is for
 beginning instrumentalists working on short technical passages.
 
 Set a passage, start its optional reference pulse, then play six takes. Use

@@ -9,7 +9,7 @@ const LICENSE_KEY = `sb_license:${SLUG}`;
 const VERIFY_KEY = `sb_license_verdict:${SLUG}`;
 const API_BASE = 'https://api.sociobot.in/api/v1';
 const CHECKOUT = `${API_BASE}/products/${SLUG}/checkout`;
-const BUILD_ID = 'v1.2.0';
+const BUILD_ID = 'v1.3.0';
 
 type OfflineReadiness = 'preparing' | 'ready' | 'unavailable';
 const supportsServiceWorkers = 'serviceWorker' in navigator;
@@ -101,7 +101,7 @@ function header(): string {
 
 function footer(): string {
   return `<footer class="site-footer">
-    <p><strong>Steady Take</strong><br><span>Measure timing stability across repeated takes.</span></p>
+    <p><strong>Steady Take</strong><br><span>Measure timing consistency across repeated takes.</span></p>
     <nav aria-label="Footer navigation"><a href="/privacy" data-nav>Privacy</a><a href="/terms" data-nav>Terms</a><a href="https://hello-factory.sociobot.in/" rel="external">Built by Param Factory <span class="sr-only">(external)</span></a></nav>
     <p class="build">${BUILD_ID} · Generated artwork</p>
   </footer>`;

@@ -1,9 +1,9 @@
 {
-  "name": "Steady Take — timing stability practice",
+  "name": "Steady Take — timing consistency practice",
   "short_name": "Steady Take",
-  "description": "Measure timing stability across repeated practice takes.",
+  "description": "Measure timing consistency across repeated practice takes.",
   "id": "/",
-  "start_url": "/practice?v=1",
+  "start_url": "/practice?v=2",
   "scope": "/",
   "display": "standalone",
   "background_color": "#F4F0E6",

@@ -36,6 +36,19 @@ test('desktop first screen includes all three product facts', async ({ page }) =
   }
 });
 
+test('visitor-facing surfaces use timing consistency as the core term', async ({ page }) => {
+  for (const path of ['/', '/practice', '/demo', '/privacy', '/terms', '/missing-page', '/404.html']) {
+    await page.goto(path);
+    await expect(page.locator('body')).not.toContainText(/timing stability/i);
+  }
+
+  for (const path of ['README.md', 'index.html', 'public/manifest.webmanifest', 'public/404.html']) {
+    const copy = readFileSync(path, 'utf8');
+    expect(copy, `${path} uses one name for the core outcome`).not.toMatch(/timing stability/i);
+    expect(copy, `${path} names the core outcome`).toMatch(/timing consistency/i);
+  }
+});
+
 test('offline availability never claims readiness without service-worker control', async ({ browser }) => {
   const context = await browser.newContext({ serviceWorkers: 'block' });
   const page = await context.newPage();

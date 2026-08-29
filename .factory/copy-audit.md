@@ -1,6 +1,6 @@
 # Landing copy audit
 
-Audit date: 2026-08-28. Counts use whitespace-separated words. Hyphenated
+Audit date: 2026-08-29. Counts use whitespace-separated words. Hyphenated
 terms count as one word. No sentence exceeds 22 words. No banned word appears.
 
 | Landing sentence | Words |
@@ -32,7 +32,7 @@ terms count as one word. No sentence exceeds 22 words. No banned word appears.
 | The full version saves unlimited practice passages on this device. | 10 |
 | Dodo hosts checkout and handles payment through Sociobot. | 8 |
 | Read the Steady Take purchase terms. | 6 |
-| Measure timing stability across repeated takes. | 6 |
+| Measure timing consistency across repeated takes. | 6 |
 
 Key labels and fragments: “Timing practice for beginners” (4), “Measure timing
 consistency across takes” (5), “Try it with sample data” (5), “Compare timing
@@ -42,6 +42,10 @@ spread” (3), “Repeat one short passage” (4), “What Steady Take measures�
 The first screen reads in one breath: Steady Take measures timing consistency
 for beginning instrumentalists; try it with sample data first. The adjacent
 text says the sample contains six sessions and a 52% change.
+
+The README opening, initial HTML description, install manifest, application
+footer, and static 404 footer all use “timing consistency.” No visitor-facing
+surface calls the same outcome “timing stability.”
 
 ## Terminology
 
